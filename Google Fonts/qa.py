@@ -512,7 +512,7 @@ class TestVerticalMetrics(TestGlyphsFiles):
                     abs(ymin),
                     "%s winDescent %s is not equal to %s" % (
                         master.name,
-                        win_descent,
+                        abs(win_descent),
                         ymin)
                 )
 

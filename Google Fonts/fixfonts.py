@@ -136,4 +136,7 @@ def main():
 
 
 if __name__ == '__main__':
+    Glyphs.showMacroWindow()
     main()
+    print 'Fonts updated to GF spec'
+

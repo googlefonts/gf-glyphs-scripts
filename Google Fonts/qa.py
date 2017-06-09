@@ -190,15 +190,18 @@ class TestFontInfo(TestGlyphsFiles):
             )
 
             copyright_search = re.search(family_copyright_pattern, font.copyright)
-            self.assertIsNotNone(
-                copyright_search,
-                'font.copyright is incorrect. It must contain or be:\n' + \
-                'Copyright %s The %s Project Authors (%s)' %(
-                    datetime.now().year,
-                    font.familyName,
-                    repo_git_url,
+            if repo_git_url:
+                self.assertIsNotNone(
+                    copyright_search,
+                    'font.copyright is incorrect. It must contain or be:\n' + \
+                    'Copyright %s The %s Project Authors (%s)' %(
+                        datetime.now().year,
+                        font.familyName,
+                        repo_git_url,
+                    )
                 )
-            )
+            else:
+                raise Exception('GF Upstream doc has no git url for family')
 
     def test_style_names(self):
         """Instance names must be in STYLE_NAMES"""

@@ -577,7 +577,7 @@ class TestRepositoryStructure(TestGlyphsFiles):
 
     def test_authors_file_exists(self):
         self.assertIn(
-            'AUTHOR.txt', 
+            'AUTHORS.txt',
             os.listdir(project_dir),
             "'AUTHOR.txt' is missing in parent directory")
 

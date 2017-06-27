@@ -579,7 +579,7 @@ class TestRepositoryStructure(TestGlyphsFiles):
         self.assertIn(
             'AUTHORS.txt',
             os.listdir(project_dir),
-            "'AUTHOR.txt' is missing in parent directory")
+            "'AUTHORS.txt' is missing in parent directory")
 
 
 if __name__ == '__main__':

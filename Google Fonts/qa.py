@@ -515,8 +515,8 @@ class TestVerticalMetrics(TestGlyphsFiles):
                     abs(ymin),
                     "%s winDescent %s is not equal to %s" % (
                         master.name,
-                        abs(win_descent),
-                        ymin)
+                        win_descent,
+                        abs(ymin))
                 )
 
 
@@ -579,7 +579,7 @@ class TestRepositoryStructure(TestGlyphsFiles):
         self.assertIn(
             'AUTHORS.txt',
             os.listdir(project_dir),
-            "'AUTHOR.txt' is missing in parent directory")
+            "'AUTHORS.txt' is missing in parent directory")
 
 
 if __name__ == '__main__':

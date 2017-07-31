@@ -263,6 +263,38 @@ class TestFontInfo(TestGlyphsFiles):
                 except KeyError:
                     print '%s is not a correct style name' % instance.name
 
+    def test_single_instance_family_stylename_is_regular(self):
+        """If the font only has one instance, make sure its stylename and
+        weight value is set to Regular, 400.
+
+        Some MS application struggle when a family does not include a
+        Regular weight.
+
+        Single weight families which visually look heavy are not exempt
+        from this rule."""
+        for font in self.fonts:
+            instances = font.instances
+            if len(instances) == 1:
+                instance = instances[0]
+                self.assertEqual(
+                    instance.name,
+                    'Regular',
+                    ('Family only contains one Instance, Instance Style Name'
+                     ' must be set to Regular')
+                )
+
+    def test_single_instance_family_weight_value_is_400(self):
+        for font in self.fonts:
+            instances = font.instances
+            if len(instances) == 1:
+                instance = instances[0]
+                self.assertEqual(
+                    instance.weightClassValue(),
+                    400,
+                    ('Family only contains one Instance, Instance Weight'
+                     ' Value must be set to 400')
+                )
+
 
 class TestMultipleGlyphsFileConsistency(unittest.TestCase):
     """Families are often split into multiple .glyphs files.

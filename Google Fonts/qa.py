@@ -86,6 +86,26 @@ STYLE_NAMES = [
     'Black Italic',
 ]
 
+STYLE_WEIGHTS = {
+    'Thin': 250,
+    'ExtraLight': 275,
+    'Light': 300,
+    'Regular': 400,
+    'Medium': 500,
+    'SemiBold': 600,
+    'Bold': 700,
+    'ExtraBold': 800,
+    'Black': 900,
+    'Thin Italic': 250,
+    'ExtraLight Italic': 275,
+    'Light Italic': 300,
+    'Italic': 400,
+    'Medium Italic': 500,
+    'SemiBold Italic': 600,
+    'Bold Italic': 700,
+    'ExtraBold Italic': 800,
+    'Black Italic': 900,
+}
 
 def _font_family_url(family_name):
     '''Create the url to download a font family'''
@@ -226,6 +246,22 @@ class TestFontInfo(TestGlyphsFiles):
                 LICENSE,
                 "font.customParameters['license'] must be '%s'" % LICENSE
             )
+
+    def test_instance_weight_class(self):
+        for font in self.fonts:
+            instances = font.instances
+            for instance in instances:
+                try:
+                    self.assertEqual(
+                        instance.weightClassValue(),
+                        STYLE_WEIGHTS[instance.name],
+                        "%s instance weight value must be %s" % (
+                            instance.name,
+                            STYLE_WEIGHTS[instance.name]
+                        )
+                    )
+                except KeyError:
+                    print '%s is not a correct style name' % instance.name
 
 
 class TestMultipleGlyphsFileConsistency(unittest.TestCase):

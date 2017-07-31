@@ -334,6 +334,21 @@ class TestFontInfo(TestGlyphsFiles):
                             )
                         )
 
+    def test_stylelinking_is_consistent_for_all_non_italic_instances(self):
+        for font in self.fonts:
+            instances = font.instances
+            for instance in instances:
+                if 'Italic' not in instance.name:
+                    self.assertEqual(
+                        '',
+                        instance.linkStyle,
+                        ("%s instance must have no style linking."
+                         " Delete link to %s") % (
+                            instance.name,
+                            instance.linkStyle 
+                        )
+                    )
+
 
 class TestMultipleGlyphsFileConsistency(unittest.TestCase):
     """Families are often split into multiple .glyphs files.

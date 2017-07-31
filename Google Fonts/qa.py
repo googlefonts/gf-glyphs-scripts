@@ -304,7 +304,34 @@ class TestFontInfo(TestGlyphsFiles):
                         instance.isItalic,
                         True,
                         '%s instance does not have "Italic of" enabled' % (
-                            instance.name)
+                            instance.name
+                        )
+                    )
+
+    def test_stylelinking_is_consistent_for_all_italic_instances(self):
+        for font in self.fonts:
+            instances = font.instances
+            for instance in instances:
+                if 'Italic' in instance.name:
+                    if instance.name == 'Italic' or instance.name == 'Bold Italic':
+                        self.assertEqual(
+                            '',
+                            instance.linkStyle,
+                            ("%s instance must have no style linking."
+                             " Delete link to %s") % (
+                                instance.name,
+                                instance.linkStyle
+                            )
+                        )
+                    else:
+                        roman_link_style = instance.name.split()[0]
+                        self.assertEqual(
+                            roman_link_style,
+                            instance.linkStyle,
+                            "%s instance must be style linked to %s" % (
+                                instance.name,
+                                roman_link_style
+                            )
                         )
 
 

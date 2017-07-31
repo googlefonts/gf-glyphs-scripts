@@ -295,6 +295,18 @@ class TestFontInfo(TestGlyphsFiles):
                      ' Value must be set to 400')
                 )
 
+    def test_italic_instances_have_isItalic_set(self):
+        for font in self.fonts:
+            instances = font.instances
+            for instance in instances:
+                if 'Italic' in instance.name:
+                    self.assertEqual(
+                        instance.isItalic,
+                        True,
+                        '%s instance does not have "Italic of" enabled' % (
+                            instance.name)
+                        )
+
 
 class TestMultipleGlyphsFileConsistency(unittest.TestCase):
     """Families are often split into multiple .glyphs files.

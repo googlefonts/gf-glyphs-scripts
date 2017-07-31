@@ -307,6 +307,14 @@ class TestFontInfo(TestGlyphsFiles):
                             instance.name
                         )
                     )
+                else:
+                    self.assertEqual(
+                        instance.isItalic,
+                        False,
+                        '%s instance must not have "Italic of" enabled' % (
+                            instance.name
+                        )
+                    )
 
     def test_instances_have_isBold_set(self):
         """Only the Bold and Bold Italic instances should have

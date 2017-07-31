@@ -308,6 +308,29 @@ class TestFontInfo(TestGlyphsFiles):
                         )
                     )
 
+    def test_instances_have_isBold_set(self):
+        """Only the Bold and Bold Italic instances should have
+        this flag set"""
+        for font in self.fonts:
+            instances = font.instances
+            for instance in instances:
+                if instance.name == 'Bold' or instance.name == 'Bold Italic':
+                    self.assertEqual(
+                        instance.isBold,
+                        True,
+                        '%s instance does not have "Bold of" enabled' % (
+                            instance.name
+                        )
+                    )
+                else:
+                    self.assertEqual(
+                        instance.isBold,
+                        False,
+                        '%s instance must not have "Bold of" enabled' %(
+                            instance.name
+                        )
+                    )
+
     def test_stylelinking_is_consistent_for_all_italic_instances(self):
         for font in self.fonts:
             instances = font.instances

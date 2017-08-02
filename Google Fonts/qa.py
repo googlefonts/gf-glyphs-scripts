@@ -670,7 +670,7 @@ class TestVerticalMetrics(TestGlyphsFiles):
 
 
     def test_win_ascent_and_win_descent_equal_bbox(self):
-        """Check Win Ascent and Win Descent equal yMax, yMin of font bbox
+        """Check Win Ascent and Win Descent equal yMax, yMin of bbox
 
         MS recommends OS/2's win Ascent and win Descent must be the ymax
         and ymin of the bbox"""
@@ -690,9 +690,7 @@ class TestVerticalMetrics(TestGlyphsFiles):
                 self.assertEqual(
                     int(win_ascent),
                     ymax,
-                    ("Win Ascent does not equal yMax of font bounding "
-                     "box.\n\n"
-                     "%s master's winAscent %s is not equal to yMax %s") % (
+                    ("%s master's winAscent %s is not equal to yMax %s") % (
                         master.name,
                         win_ascent,
                         ymax)
@@ -701,9 +699,7 @@ class TestVerticalMetrics(TestGlyphsFiles):
                 self.assertEqual(
                     int(win_descent),
                     abs(ymin),
-                    ("Win Descent does not equal yMin of font bounding "
-                     "box.\n\n"
-                     "%s master's winDescent %s is not equal to yMin %s") % (
+                    ("%s master's winDescent %s is not equal to yMin %s") % (
                         master.name,
                         win_descent,
                         abs(ymin))

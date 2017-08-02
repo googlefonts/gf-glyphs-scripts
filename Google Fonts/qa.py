@@ -6,6 +6,7 @@ https://github.com/googlefonts/gf-docs/blob/master/ProjectChecklist.md
 """
 import unittest
 from unittest import TestProgram
+from runner import GlyphsTestRunner
 import os
 from ntpath import basename
 import urllib
@@ -191,7 +192,7 @@ class TestGlyphsFiles(unittest.TestCase):
 class TestFontInfo(TestGlyphsFiles):
 
     def test_copyright(self):
-        """Copyright string matches specification:
+        """Check copyright string is correct
 
         https://github.com/googlefonts/gf-docs/blob/master/ProjectChecklist.md#ofltxt
 
@@ -232,7 +233,7 @@ class TestFontInfo(TestGlyphsFiles):
                 raise Exception('GF Upstream doc has no git url for family')
 
     def test_style_names(self):
-        """Instance names must conform to the Google Fonts API"""
+        """Check instances have the correct name for the GF API"""
         for font in self.fonts:
             instances = font.instances
             family_styles = set([i.name for i in instances])
@@ -245,6 +246,7 @@ class TestFontInfo(TestGlyphsFiles):
                      "%s") % (style, '\n- '.join(STYLE_NAMES)))
 
     def test_license_url(self):
+        """Check family has 'licenseURL' custom parameter"""
         for font in self.fonts:
             self.assertEqual(
                 font.customParameters['licenseURL'],
@@ -254,6 +256,7 @@ class TestFontInfo(TestGlyphsFiles):
             )
 
     def test_license(self):
+        """Check family has 'license' custom parameter"""
         for font in self.fonts:
             self.assertEqual(
                 font.customParameters['license'],
@@ -263,6 +266,7 @@ class TestFontInfo(TestGlyphsFiles):
             )
 
     def test_instance_weight_class(self):
+        """Check each instance has the correct weight value"""
         for font in self.fonts:
             instances = font.instances
             for instance in instances:
@@ -280,7 +284,9 @@ class TestFontInfo(TestGlyphsFiles):
                     print '%s is not a correct style name' % instance.name
 
     def test_single_instance_family_is_regular(self):
-        """If the font only has one instance, make sure its stylename and
+        """Check single weight families have Regular style name
+
+        If the font only has one instance, make sure its stylename and
         weight value is set to Regular, 400.
 
         Some MS application struggle when a family does not include a
@@ -301,6 +307,7 @@ class TestFontInfo(TestGlyphsFiles):
                 )
 
     def test_italic_instances_have_isItalic_set(self):
+        """Check only italic instances have 'isItalic' set"""
         for font in self.fonts:
             instances = font.instances
             for instance in instances:
@@ -324,8 +331,7 @@ class TestFontInfo(TestGlyphsFiles):
                     )
 
     def test_instances_have_isBold_set(self):
-        """Only the Bold and Bold Italic instances should have
-        this flag set"""
+        """Check only Bold and Bold Italic have 'isBold' set"""
         for font in self.fonts:
             instances = font.instances
             for instance in instances:
@@ -351,6 +357,7 @@ class TestFontInfo(TestGlyphsFiles):
                     )
 
     def test_stylelinking_is_consistent_for_all_italic_instances(self):
+        """Check style linking is correct for italic instances"""
         for font in self.fonts:
             instances = font.instances
             for instance in instances:
@@ -377,6 +384,7 @@ class TestFontInfo(TestGlyphsFiles):
                         )
 
     def test_stylelinking_is_consistent_for_all_non_italic_instances(self):
+        """Check style linking is correct for non italic instances"""
         for font in self.fonts:
             instances = font.instances
             for instance in instances:
@@ -400,6 +408,7 @@ class TestMultipleGlyphsFileConsistency(unittest.TestCase):
         self.fonts = Glyphs.fonts
 
     def test_files_share_same_attributes(self):
+        """Check all .glyph files share same parameters"""
         for font1 in self.fonts:
             for font2 in self.fonts:
                 for attrib in FONT_ATTRIBS:
@@ -418,6 +427,7 @@ class TestMultipleGlyphsFileConsistency(unittest.TestCase):
                     )
 
     def test_font_customParameters_are_equal(self):
+        """Check all .glyph files share same custom parameters"""
         for font1 in self.fonts:
             for font2 in self.fonts:
                 for param in font1.customParameters:
@@ -454,8 +464,7 @@ class TestRegressions(TestGlyphsFiles):
 
 
     def test_missing_glyphs(self):
-        """Family updates should include the same glyphs as the
-        previous release."""
+        """Check family includes all the glyphs in GF version"""
         if self.remote_font:
             local_fonts = self._hash_fonts(self.ttfs)
             remote_fonts = self._hash_fonts(self.remote_font)
@@ -476,8 +485,7 @@ class TestRegressions(TestGlyphsFiles):
                 )
 
     def test_missing_instances(self):
-        """Family updates must include the same instances as the previous
-        release."""
+        """Check family includes the same styles as GF version"""
         if self.remote_font:
             local_styles = self._get_font_styles(self.ttfs)
             remote_styles = self._get_font_styles(self.remote_font)
@@ -486,7 +494,9 @@ class TestRegressions(TestGlyphsFiles):
                             'Font is missing instances [%s] are all .glyphs file open?' % ', '.join(missing))
 
     def test_version_number_has_advanced(self):
-        """If the family has a version number lower than the family being
+        """Check family version number is greater than GF version
+
+        If the family has a version number lower than the family being
         served on fonts.google.com, it may mean the repository is based on
         older sources. Authors need to investigate if they are working from
         the correct source.
@@ -505,7 +515,9 @@ class TestRegressions(TestGlyphsFiles):
                 )
 
     def test_vert_metrics_visually_match(self):
-        """Vertical metrics must visually match the version hosted
+        """Test vertical metrics visually match GF version
+
+        Vertical metrics must visually match the version hosted
         on fonts.google.com.
 
         If the hosted family doesn't have the fsSelection bit 7 enabled,
@@ -623,19 +635,19 @@ class TestRegressions(TestGlyphsFiles):
 class TestVerticalMetrics(TestGlyphsFiles):
     
     def test_family_has_use_typo_metrics_enabled(self):
+        """Check family has 'Use Typo Metrics enabled'"""
         for font in self.fonts:
             self.assertEqual(
                 font.customParameters['Use Typo Metrics'],
                 True,
-                ("Font must have custom parameter 'Use Typo Metrics'"
+                ("Font must have custom parameter 'Use Typo Metrics' "
                  "enabled.\n\n"
                  "Add the custom parameter font.customParameters"
                  "['Use Typo Metrics'].")
             )
 
     def test_family_share_same_metric_values(self):
-        """If the family has not been released on Google Fonts, each
-        instance should have the same vertical metric values."""
+        """Check each instance has same vertical metric values"""
         if not self.remote_font:
             font_master1_params = self.fonts[0].masters[0].customParameters
 
@@ -658,7 +670,9 @@ class TestVerticalMetrics(TestGlyphsFiles):
 
 
     def test_win_ascent_and_win_descent_equal_bbox(self):
-        """MS recommends OS/2's win Ascent and win Descent must be the ymax
+        """Check Win Ascent and Win Descent equal yMax, yMin of bbox
+
+        MS recommends OS/2's win Ascent and win Descent must be the ymax
         and ymin of the bbox"""
         family_ymax_ymin = []
         for font in self.fonts:
@@ -676,9 +690,7 @@ class TestVerticalMetrics(TestGlyphsFiles):
                 self.assertEqual(
                     int(win_ascent),
                     ymax,
-                    ("Win Ascent does not equal yMax of font bounding "
-                     "box.\n\n"
-                     "%s master's winAscent %s is not equal to %s") % (
+                    ("%s master's winAscent %s is not equal to yMax %s") % (
                         master.name,
                         win_ascent,
                         ymax)
@@ -687,9 +699,7 @@ class TestVerticalMetrics(TestGlyphsFiles):
                 self.assertEqual(
                     int(win_descent),
                     abs(ymin),
-                    ("Win Descent does not equal yMin of font bounding "
-                     "box.\n\n"
-                     "%s master's winDescent %s is not equal to %s") % (
+                    ("%s master's winDescent %s is not equal to yMin %s") % (
                         master.name,
                         win_descent,
                         abs(ymin))
@@ -716,8 +726,7 @@ class TestRepositoryStructure(TestGlyphsFiles):
 
     """
     def test_repo_in_gf_upstream_repos_doc(self):
-        """Check the repository has been recorded in the GF Upstream doc,
-        http://tinyurl.com/kd9lort"""
+        """Check the family is in GF Upstream document"""
         found = False
         for font in self.fonts:
             for row in self.repos_doc:
@@ -732,6 +741,7 @@ class TestRepositoryStructure(TestGlyphsFiles):
             )
 
     def test_fonts_dir_exists(self):
+        """Check 'fonts' directory exists"""
         abs_fonts_folder = os.path.join(project_dir, FONTS_FOLDER)
         self.assertEquals(
             True,
@@ -744,6 +754,7 @@ class TestRepositoryStructure(TestGlyphsFiles):
         )
 
     def test_sources_dir_exists(self):
+        """Check 'sources' directory exists"""
         abs_sources_folder = os.path.join(project_dir, SOURCES_FOLDER)
         self.assertEquals(
             True,
@@ -757,6 +768,7 @@ class TestRepositoryStructure(TestGlyphsFiles):
         )
 
     def test_contributors_file_exists(self):
+        """Check 'CONTRIBUTORS.txt' exists"""
         self.assertIn(
             'CONTRIBUTORS.txt',
             os.listdir(project_dir),
@@ -766,6 +778,7 @@ class TestRepositoryStructure(TestGlyphsFiles):
         )
 
     def test_authors_file_exists(self):
+        """Check 'AUTHORS.txt' exists"""
         self.assertIn(
             'AUTHORS.txt',
             os.listdir(project_dir),
@@ -782,6 +795,6 @@ if __name__ == '__main__':
         os.path.join(os.path.dirname(__glyphsfile), '..')
     )
     if len(set([f.familyName for f in Glyphs.fonts])) == 1:
-        TestProgram(argv=['--verbose'], exit=False)
+        TestProgram(argv=['--verbose'], testRunner=GlyphsTestRunner, exit=False)
     else:
         print 'Test one family at a time'

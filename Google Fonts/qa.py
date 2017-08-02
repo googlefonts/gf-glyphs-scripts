@@ -7,6 +7,7 @@ https://github.com/googlefonts/gf-docs/blob/master/ProjectChecklist.md
 import unittest
 from unittest import TestProgram
 import os
+from ntpath import basename
 import urllib
 from urllib import urlopen
 from fontTools.ttLib import TTFont
@@ -213,8 +214,15 @@ class TestFontInfo(TestGlyphsFiles):
             if repo_git_url:
                 self.assertIsNotNone(
                     copyright_search,
-                    'font.copyright is incorrect. It must contain or be:\n' + \
-                    'Copyright %s The %s Project Authors (%s)' %(
+                    ('Copyright string is incorrect.\n\n'
+                     'It must contain or be:\n'
+                     'Copyright %s The %s Project Authors (%s)\n\n'
+                     'If the family has a RFN:\n'
+                     'Copyright %s The %s Project Authors (%s), '
+                     'with Reserved Font Name "Play".') % (
+                        datetime.now().year,
+                        font.familyName,
+                        repo_git_url,
                         datetime.now().year,
                         font.familyName,
                         repo_git_url,
@@ -224,19 +232,25 @@ class TestFontInfo(TestGlyphsFiles):
                 raise Exception('GF Upstream doc has no git url for family')
 
     def test_style_names(self):
-        """Instance names must be in STYLE_NAMES"""
+        """Instance names must conform to the Google Fonts API"""
         for font in self.fonts:
             instances = font.instances
             family_styles = set([i.name for i in instances])
             for style in family_styles:
-                self.assertIn(style, STYLE_NAMES)
+                self.assertIn(
+                    style,
+                    STYLE_NAMES,
+                    ("'%s' instance is an invalid name.\n\n"
+                     "The following names are accepted:\n- "
+                     "%s") % (style, '\n- '.join(STYLE_NAMES)))
 
     def test_license_url(self):
         for font in self.fonts:
             self.assertEqual(
                 font.customParameters['licenseURL'],
                 LICENSE_URL,
-                "font.customParameters['licenseURL'] must be '%s'" % LICENSE_URL
+                ("License url is incorrect.\n\n"
+                 "font.customParameters['licenseURL'] must be '%s'") % LICENSE_URL
             )
 
     def test_license(self):
@@ -244,7 +258,8 @@ class TestFontInfo(TestGlyphsFiles):
             self.assertEqual(
                 font.customParameters['license'],
                 LICENSE,
-                "font.customParameters['license'] must be '%s'" % LICENSE
+                ("License is incorrect.\n\n"
+                 "font.customParameters['license'] must be '%s'") % LICENSE
             )
 
     def test_instance_weight_class(self):
@@ -255,7 +270,8 @@ class TestFontInfo(TestGlyphsFiles):
                     self.assertEqual(
                         instance.weightClassValue(),
                         STYLE_WEIGHTS[instance.name],
-                        "%s instance weight value must be %s" % (
+                        ("%s instance weight value is incorrect.\n\n"
+                         "It must be set to '%s'.") % (
                             instance.name,
                             STYLE_WEIGHTS[instance.name]
                         )
@@ -263,7 +279,7 @@ class TestFontInfo(TestGlyphsFiles):
                 except KeyError:
                     print '%s is not a correct style name' % instance.name
 
-    def test_single_instance_family_stylename_is_regular(self):
+    def test_single_instance_family_is_regular(self):
         """If the font only has one instance, make sure its stylename and
         weight value is set to Regular, 400.
 
@@ -279,20 +295,9 @@ class TestFontInfo(TestGlyphsFiles):
                 self.assertEqual(
                     instance.name,
                     'Regular',
-                    ('Family only contains one Instance, Instance Style Name'
-                     ' must be set to Regular')
-                )
-
-    def test_single_instance_family_weight_value_is_400(self):
-        for font in self.fonts:
-            instances = font.instances
-            if len(instances) == 1:
-                instance = instances[0]
-                self.assertEqual(
-                    instance.weightClassValue(),
-                    400,
-                    ('Family only contains one Instance, Instance Weight'
-                     ' Value must be set to 400')
+                    ("'%s' instance name is incorrect.\n\n"
+                     "Families which have just one instance must "
+                     "name the single 'Regular'") % instance.name
                 )
 
     def test_italic_instances_have_isItalic_set(self):
@@ -303,7 +308,8 @@ class TestFontInfo(TestGlyphsFiles):
                     self.assertEqual(
                         instance.isItalic,
                         True,
-                        '%s instance does not have "Italic of" enabled' % (
+                        "'%s' instance is an Italic.\n\n"
+                        "Enable 'Italic of' for the instance" % (
                             instance.name
                         )
                     )
@@ -311,7 +317,8 @@ class TestFontInfo(TestGlyphsFiles):
                     self.assertEqual(
                         instance.isItalic,
                         False,
-                        '%s instance must not have "Italic of" enabled' % (
+                        "'%s' instance is not an Italic.\n\n"
+                        "Disable 'Italic of' for the instance" % (
                             instance.name
                         )
                     )
@@ -326,7 +333,8 @@ class TestFontInfo(TestGlyphsFiles):
                     self.assertEqual(
                         instance.isBold,
                         True,
-                        '%s instance does not have "Bold of" enabled' % (
+                        "'%s' instance is a Bold weight.\n\n"
+                        'Enable "Bold of" for this instance.' % (
                             instance.name
                         )
                     )
@@ -334,7 +342,10 @@ class TestFontInfo(TestGlyphsFiles):
                     self.assertEqual(
                         instance.isBold,
                         False,
-                        '%s instance must not have "Bold of" enabled' %(
+                        "'%s' instance is not a Bold weight.\n\n"
+                        'Disable "Bold of" for this instance.\n\n'
+                        "Only the 'Bold' and 'Bold Italic instances "
+                        "should have this flag enabled" % (
                             instance.name
                         )
                     )
@@ -348,8 +359,8 @@ class TestFontInfo(TestGlyphsFiles):
                         self.assertEqual(
                             '',
                             instance.linkStyle,
-                            ("%s instance must have no style linking."
-                             " Delete link to %s") % (
+                            ("%s instance must have no style linking.\n\n"
+                             "Delete link to %s") % (
                                 instance.name,
                                 instance.linkStyle
                             )
@@ -395,11 +406,12 @@ class TestMultipleGlyphsFileConsistency(unittest.TestCase):
                     self.assertEqual(
                         getattr(font1, attrib),
                         getattr(font2, attrib),
-                        "%s %s %s not equal to %s %s %s" % (
-                            font1,
+                        ("Files do not have equal attribute parameters.\n\n"
+                         "%s %s: %s\n%s %s: %s") % (
+                            basename(font1.filepath),
                             attrib,
                             getattr(font1, attrib),
-                            font2,
+                            basename(font2.filepath),
                             attrib,
                             getattr(font2, attrib)
                         )
@@ -412,11 +424,12 @@ class TestMultipleGlyphsFileConsistency(unittest.TestCase):
                     self.assertEqual(
                         font1.customParameters[param.name],
                         font2.customParameters[param.name],
-                        '%s %s %s is not equal to %s %s %s' % (
-                            font1,
+                        ("Files do not have equal custom parameters.\n\n"
+                         "%s %s: %s\n%s %s: %s") % (
+                            basename(font1.filepath),
                             param.name,
                             font1.customParameters[param.name],
-                            font2,
+                            basename(font2.filepath),
                             param.name,
                             font2.customParameters[param.name],
                         )
@@ -614,10 +627,15 @@ class TestVerticalMetrics(TestGlyphsFiles):
             self.assertEqual(
                 font.customParameters['Use Typo Metrics'],
                 True,
-                "Use font.customParameters['Typo Metrics'] must be enabled"
+                ("Font must have custom parameter 'Use Typo Metrics'"
+                 "enabled.\n\n"
+                 "Add the custom parameter font.customParameters"
+                 "['Use Typo Metrics'].")
             )
 
     def test_family_share_same_metric_values(self):
+        """If the family has not been released on Google Fonts, each
+        instance should have the same vertical metric values."""
         if not self.remote_font:
             font_master1_params = self.fonts[0].masters[0].customParameters
 
@@ -628,15 +646,16 @@ class TestVerticalMetrics(TestGlyphsFiles):
                             self.assertEqual(
                                 font_master1_params[param.name],
                                 master.customParameters[param.name],
-                                '%s %s %s is not equal to %s' % (
+                                ("Vertical metrics are not family wide "
+                                 "consistent.\n\n"
+                                 "%s %s %s is not equal to %s") % (
                                     master.name,
                                     param.name,
                                     master.customParameters[param.name],
                                     font_master1_params[param.name],
                                 )
                             )
-        else:
-            pass
+
 
     def test_win_ascent_and_win_descent_equal_bbox(self):
         """MS recommends OS/2's win Ascent and win Descent must be the ymax
@@ -657,7 +676,9 @@ class TestVerticalMetrics(TestGlyphsFiles):
                 self.assertEqual(
                     int(win_ascent),
                     ymax,
-                    "%s winAscent %s is not equal to %s" % (
+                    ("Win Ascent does not equal yMax of font bounding "
+                     "box.\n\n"
+                     "%s master's winAscent %s is not equal to %s") % (
                         master.name,
                         win_ascent,
                         ymax)
@@ -666,7 +687,9 @@ class TestVerticalMetrics(TestGlyphsFiles):
                 self.assertEqual(
                     int(win_descent),
                     abs(ymin),
-                    "%s winDescent %s is not equal to %s" % (
+                    ("Win Descent does not equal yMin of font bounding "
+                     "box.\n\n"
+                     "%s master's winDescent %s is not equal to %s") % (
                         master.name,
                         win_descent,
                         abs(ymin))
@@ -703,7 +726,9 @@ class TestRepositoryStructure(TestGlyphsFiles):
             self.assertEqual(
                 True,
                 found, 
-                'Family is not listed in GF Master repo doc, %s' % UPSTREAM_REPO_URLS
+                ("Family is not listed in the GF Master repo doc, %s.\n\n"
+                 "Listing the family helps us keep track of it and ensure "
+                 "there is one original source") % UPSTREAM_REPO_URLS
             )
 
     def test_fonts_dir_exists(self):
@@ -711,7 +736,11 @@ class TestRepositoryStructure(TestGlyphsFiles):
         self.assertEquals(
             True,
             os.path.isdir(abs_fonts_folder),
-            "'%s' folder is missing or named incorrectly" % abs_fonts_folder
+            ("'%s' folder is missing or named incorrectly.\n\n"
+             "Font binaries should be generated into this folder. "
+             "Sub folders for 'ttf', 'otf', 'web' are allowed.") % (
+                 abs_fonts_folder
+            )
         )
 
     def test_sources_dir_exists(self):
@@ -719,20 +748,31 @@ class TestRepositoryStructure(TestGlyphsFiles):
         self.assertEquals(
             True,
             os.path.isdir(abs_sources_folder),
-            "'%s' folder is missing or named incorrectly" % abs_sources_folder
+            ("'%s' folder is missing or named incorrectly.\n\n"
+             "Source files must be stored here. There should only be "
+             "one definitive source. Version control allows us to access "
+             "previous version (we can rewind history if needed).\n\n"
+             "Naming files using the following convention is banned, "
+             "family-regular_AA|AB.ttf.") % abs_sources_folder
         )
 
     def test_contributors_file_exists(self):
         self.assertIn(
             'CONTRIBUTORS.txt',
             os.listdir(project_dir),
-            "'CONTRIBUTORS.txt' is missing in parent directory")
+            ("'CONTRIBUTORS.txt' is missing in parent directory.\n\n"
+             "Use https://raw.githubusercontent.com/Gue3bara/Cairo/master/CONTRIBUTORS.txt "
+             "as a reference to make your own.")
+        )
 
     def test_authors_file_exists(self):
         self.assertIn(
             'AUTHORS.txt',
             os.listdir(project_dir),
-            "'AUTHORS.txt' is missing in parent directory")
+            ("'AUTHORS.txt' is missing in parent directory.\n\n"
+             "Use https://raw.githubusercontent.com/Gue3bara/Cairo/master/AUTHORS.txt "
+             "as a reference to make your own.")
+        )
 
 
 if __name__ == '__main__':

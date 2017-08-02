@@ -574,6 +574,7 @@ class TestRegressions(TestGlyphsFiles):
                         "Local %s typoLineGap %s is not equal to remote %s typoLineGap %s" % (
                             style,
                             l_font['OS/2'].sTypoLineGap,
+                            style,
                             int(r_font['OS/2'].sTypoLineGap / float(r_upm) * l_upm),
                         )
                     )
@@ -584,16 +585,18 @@ class TestRegressions(TestGlyphsFiles):
                         "Local %s typoAscender %s is not equal to remote %s winAscent %s" % (
                             style,
                             l_font['OS/2'].sTypoAscender,
+                            style,
                             int(r_font['OS/2'].usWinAscent / float(r_upm) * l_upm),
                         )
                     )
                     self.assertEqual(
                         l_font['OS/2'].sTypoDescender,
                         - int(r_font['OS/2'].usWinDescent / float(r_upm) * l_upm),
-                        "Local %s typoDescender %s is not equal to remote %s winDescent %s" % (
+                        "Local %s typoDescender %s is not equal to remote %s winDescent -%s" % (
                             style,
                             l_font['OS/2'].sTypoDescender,
-                            - int(r_font['OS/2'].usWinDescent / float(r_upm) * l_upm),
+                            style,
+                            int(r_font['OS/2'].usWinDescent / float(r_upm) * l_upm),
                         )
                     )
                     self.assertEqual(
@@ -601,6 +604,7 @@ class TestRegressions(TestGlyphsFiles):
                         0,
                         "Local %s typoLineGap %s is not equal to 0" % (
                             style,
+                            l_font['OS/2'].sTypoLineGap
                         )
                     )
 
@@ -610,6 +614,7 @@ class TestRegressions(TestGlyphsFiles):
                     "Local %s hheaAscender %s is not equal to remote %s hheaAscender %s" % (
                         style,
                         l_font['hhea'].ascent, 
+                        style,
                         int(r_font['hhea'].ascent / float(r_upm) * l_upm),
                     )
                 )
@@ -619,6 +624,7 @@ class TestRegressions(TestGlyphsFiles):
                     "Local %s hheaDescender %s is not equal to remote %s hheaDescender %s" % (
                         style,
                         l_font['hhea'].descent,
+                        style,
                         int(r_font['hhea'].descent / float(r_upm) * l_upm),
                     )
                 )
@@ -628,6 +634,7 @@ class TestRegressions(TestGlyphsFiles):
                     "Local %s hheaLineGap %s is not equal to remote %s hheaLineGap %s" % (
                         style,
                         l_font['hhea'].lineGap,
+                        style,
                         int(r_font['hhea'].lineGap / float(r_upm) * l_upm),
                     )
                 )
@@ -796,6 +803,6 @@ if __name__ == '__main__':
         os.path.join(os.path.dirname(__glyphsfile), '..')
     )
     if len(set([f.familyName for f in Glyphs.fonts])) == 1:
-        TestProgram(argv=['--verbose'], testRunner=GlyphsTestRunner, exit=False)
+        TestProgram(argv=['--verbose'], exit=False, testRunner=GlyphsTestRunner)
     else:
         print 'Test one family at a time'

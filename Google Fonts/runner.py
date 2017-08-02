@@ -31,14 +31,17 @@ Google Fonts > Fix fonts for GF spec
         result.printErrors()
         run = result.testsRun
         self.stream.writeln(self.description)
-        self.stream.writeln("TESTS RUN: %s | PASSED: %s | FAILED: %s\n" % (
+        self.stream.writeln('=' * 80)
+        self.stream.writeln("TESTS RUN: %s | PASSED: %s | FAILED: %s" % (
             all_tests,
             passed_tests,
             failed_tests
             )
         )
+        self.stream.writeln('=' * 80)
+        self.stream.writeln('\n')
         
-        if not result.wasSuccessful():
+        if passed_tests != all_tests:
             for failed_test in result.failures:
                 title, fix_text = failed_test
                 self.stream.writeln('=' * 80)
@@ -47,6 +50,6 @@ Google Fonts > Fix fonts for GF spec
                 self.stream.writeln(''.join(fix_text))
                 self.stream.writeln('\n')
         else:
-            self.stream.writeln('PASSED. No Errors')
+            self.stream.writeln('All checks passed!')
 
         return result

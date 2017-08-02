@@ -220,13 +220,14 @@ class TestFontInfo(TestGlyphsFiles):
                      'Copyright %s The %s Project Authors (%s)\n\n'
                      'If the family has a RFN:\n'
                      'Copyright %s The %s Project Authors (%s), '
-                     'with Reserved Font Name "Play".') % (
+                     'with Reserved Font Name "%s".') % (
                         datetime.now().year,
                         font.familyName,
                         repo_git_url,
                         datetime.now().year,
                         font.familyName,
                         repo_git_url,
+                        font.familyName,
                     )
                 )
             else:

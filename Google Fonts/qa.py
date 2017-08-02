@@ -635,7 +635,7 @@ class TestRegressions(TestGlyphsFiles):
 class TestVerticalMetrics(TestGlyphsFiles):
     
     def test_family_has_use_typo_metrics_enabled(self):
-        """Check family has 'Use Typo Metrics enabled'"""
+        """Check family has 'Use Typo Metrics' enabled"""
         for font in self.fonts:
             self.assertEqual(
                 font.customParameters['Use Typo Metrics'],

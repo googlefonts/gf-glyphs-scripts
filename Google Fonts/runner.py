@@ -8,7 +8,7 @@ class GlyphsTestRunner(TextTestRunner):
     description = """Google Fonts QA
 ~~~~~~~~~~~~~~~
 
-Tests to ensure .glyphs file follow the Google Fonts specification.
+Tests to ensure .glyphs files follow the Google Fonts specification.
 
 The Google Fonts specification:
 https://github.com/googlefonts/gf-docs/blob/master/ProjectChecklist.md

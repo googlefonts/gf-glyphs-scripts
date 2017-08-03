@@ -5,8 +5,11 @@ Fix/add requirements from ProjectChecklist.md
 import re
 from utils import (
     download_gf_family,
-    ttf_family_style_name
+    ttf_family_style_name,
+    RepoDoc,
+    UPSTREAM_REPO_URLS
 )
+from datetime import datetime
 from vertmetrics import shortest_tallest_glyphs
 
 BAD_PARAMETERS = [
@@ -22,6 +25,43 @@ BAD_PARAMETERS = [
 def style_from_ttf(ttf):
     family, style = ttf_family_style_name(ttf)
     return style
+
+
+def gen_copyright_string(font):
+    """Automatically Generate the family's copyright string, using the
+    GF Repo doc, http://tinyurl.com/kd9lort"""
+    current_copyright = font.copyright
+    year = re.search(r'[0-9]{4}', current_copyright)
+    if year:
+        year = year.group(0)
+    else:
+        year = datetime.now().year
+
+    project_name = font.familyName
+    current_rfn = re.search(r'(?<=Reserved Font Name \").*(?=\")', current_copyright)
+
+    repo_doc = RepoDoc()
+    git_url = repo_doc.family_url(font.familyName)
+    if not git_url:
+        print ('Cannot auto gen copyright string. Git url not listed in '
+               'Repo Doc, %s') % UPSTREAM_REPO_URLS
+        return
+
+    if not current_rfn:
+        new_copyright = 'Copyright %s The %s Project Authors (%s)' % (
+            year,
+            project_name,
+            git_url
+        )
+    else:
+        new_copyright = ('Copyright %s The %s Project Authors (%s), '
+                         'with Reserved Font Name "(%s)".') % (
+            year,
+            project_name,
+            git_url,
+            current_rfn.group(0)
+        )
+    font.copyright = new_copyright
 
 
 def visual_inherit_vertical_metrics(font, ttfs_gf):
@@ -80,6 +120,7 @@ def main():
     # Add README file if it does not exist
 
     font = Glyphs.font
+    gen_copyright_string(font)
     font.customParameters['license'] = 'This Font Software is licensed under the SIL Open Font License, Version 1.1. This license is available with a FAQ at: http://scripts.sil.org/OFL'
     font.customParameters['licenseURL'] = 'http://scripts.sil.org/OFL'
     font.customParameters['fsType'] = []

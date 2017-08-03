@@ -61,9 +61,24 @@ def download_gf_family(name):
         return fonts_from_zip(family_zip)
 
 
-def get_repos_doc():
-    """return Google Repo doc"""
+class RepoDoc:
+    """return the Google Repo doc which contains all repo urls"""
     handle = urlopen(UPSTREAM_REPO_URLS)
     ss = StringIO(handle.read())
-    reader = csv.DictReader(ss)
-    return reader
+    _doc = list(csv.DictReader(ss))
+
+    @property
+    def doc(self):
+        return self._doc
+
+    def has_family(self, familyname):
+        families = [r['family'] for r in self._doc]
+        if familyname in families:
+            return True
+        return False
+
+    def family_url(self, familyname):
+        for row in self._doc:
+            if str(row['family']) == str(familyname):
+                return row['upstream']
+        return None

@@ -642,6 +642,27 @@ class TestRegressions(TestGlyphsFiles):
 
 class TestVerticalMetrics(TestGlyphsFiles):
     
+    def test_family_has_vertical_metric_parameters(self):
+        """Check family has vertical metric custom parameters
+
+        Vertical metrics custom parameters are needed because these need to
+        be set manually. They should not be calculated by Glyphsapp."""
+        for font in self.fonts:
+            masters = font.masters
+            for master in masters:
+                master_vert_params = set([p.name for p in master.customParameters])
+                required_vert_params = set([p for p in VERT_KEYS])
+                missing_vert_params = required_vert_params - master_vert_params
+                self.assertEqual(
+                    None,
+                    missing_vert_params,
+                    ("%s master is missing the following vertical metric "
+                     "custom parameters [%s]") % (
+                         master.name,
+                         ', '.join(missing_vert_params),
+                     )
+                )
+
     def test_family_has_use_typo_metrics_enabled(self):
         """Check family has 'Use Typo Metrics' enabled"""
         for font in self.fonts:

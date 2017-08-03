@@ -427,24 +427,25 @@ class TestRegressions(TestGlyphsFiles):
         return dict(zip(styles, ttfs))
 
 
-    def test_missing_glyphs(self):
-        """Check family includes all the glyphs in GF version"""
+    def test_missing_encoded_glyphs(self):
+        """Check family includes all encoded glyphs which are in the GF version"""
         if self.remote_font:
             local_fonts = self._hash_fonts(self.ttfs)
             remote_fonts = self._hash_fonts(self.remote_font)
             shared_styles = set(local_fonts.keys()) & set(remote_fonts.keys())
 
             for style in shared_styles:
-                local_glyphs = set(local_fonts[style].getGlyphSet().keys())
-                remote_glyphs = set(remote_fonts[style].getGlyphSet().keys())
+                local_cmap = local_fonts[style]['cmap'].getcmap(3, 1).cmap
+                remote_cmap = remote_fonts[style]['cmap'].getcmap(3, 1).cmap
 
-                missing = remote_glyphs - local_glyphs
+                missing_codepoints = set(remote_cmap.keys()) - set(local_cmap.keys())
+                missing_glyphs = set([remote_cmap[m] for m in missing_codepoints])
                 self.assertEqual(
-                    missing,
+                    missing_glyphs,
                     set([]),
                     '%s is missing [%s]' % (
                         style,
-                        ', '.join(missing)
+                        ', '.join(missing_glyphs)
                     )
                 )
 

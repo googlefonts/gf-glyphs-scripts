@@ -21,8 +21,8 @@ import tempfile
 from vertmetrics import VERT_KEYS, shortest_tallest_glyphs
 from utils import (
     download_gf_family,
-    get_repos_doc,
     UPSTREAM_REPO_URLS,
+    RepoDoc
 )
 
 FONT_ATTRIBS = [
@@ -121,6 +121,7 @@ class TestGlyphsFiles(unittest.TestCase):
         cls._remote_font = None
         cls._ttfs = None
         cls._temp_dir = tempfile.mkdtemp()
+        cls._repo_doc = None
 
     @classmethod
     def tearDownClass(cls):
@@ -136,10 +137,10 @@ class TestGlyphsFiles(unittest.TestCase):
         return None
 
     @property
-    def repos_doc(self):
+    def repo_doc(self):
         """Return a csv DictReader object of the GF_Repo doc"""
         if not self._repos_doc:
-            self._repos_doc = get_repos_doc()
+            self._repos_doc = RepoDoc()
         return self._repos_doc
 
     @property
@@ -167,10 +168,7 @@ class TestFontInfo(TestGlyphsFiles):
         repo_git_url = None
         for font in self.fonts:
             if not repo_git_url:
-                for row in self.repos_doc:
-                    if row['family'] == font.familyName:
-                        repo_git_url = str(row['upstream'])
-                        break
+                repo_git_url = self.repo_doc.family_url(font.familyName)
 
             family_copyright_pattern = r'Copyright [0-9]{4} The %s Project Authors \(%s\)' % (
                 font.familyName, repo_git_url
@@ -724,9 +722,8 @@ class TestRepositoryStructure(TestGlyphsFiles):
         """Check the family is in GF Upstream document"""
         found = False
         for font in self.fonts:
-            for row in self.repos_doc:
-                if row['family'] == font.familyName:
-                    found = True
+            if self.repo_doc.has_family(font.familyName):
+                found = True
             self.assertEqual(
                 True,
                 found, 

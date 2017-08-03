@@ -3,6 +3,11 @@
 Fix/add requirements from ProjectChecklist.md
 '''
 import re
+from utils import (
+    download_gf_family,
+    ttf_family_style_name
+)
+from vertmetrics import shortest_tallest_glyphs
 
 BAD_PARAMETERS = [
     'openTypeNameLicense',
@@ -14,10 +19,61 @@ BAD_PARAMETERS = [
     'Family Alignment Zones',
 ]
 
+def style_from_ttf(ttf):
+    family, style = ttf_family_style_name(ttf)
+    return style
 
-def _convert_camelcase(name, seperator=' '):
-    """ExtraCondensed -> Extra Condensed"""
-    return re.sub('(?!^)([A-Z]|[0-9]+)', r'%s\1' % seperator, name)
+
+def visual_inherit_vertical_metrics(font, ttfs_gf):
+    """Inherit vertical metrics from family hosted on GF.
+
+    Approach will ensure metrics look the same as the previous release and
+    across all platforms, whilst avoiding clipping in MS applications."""
+    masters = font.masters
+    # ExtraBold Italic - ExtraBoldItalic
+    masters_h = {str(m.name.replace(' ', '')): m for m in masters}
+
+    ttfs_gf_h = {style_from_ttf(f): f for f in ttfs_gf}
+
+    # Masters which match downloaded ttf
+    mm_styles = set(masters_h.keys()) & set(ttfs_gf_h.keys())
+    for style in mm_styles:
+        master = masters_h[style]
+        ttf_gf = ttfs_gf_h[style]
+
+        # Is Use Typo Metrics enabled?
+        master_use_typo_metrics = master.customParameters['Use Typo Metrics'] \
+            if master.customParameters['Use Typo Metrics'] \
+            else font.customParameters['Use Typo Metrics']
+        ttf_gf_use_typo_metrics = ttf_gf['OS/2'].fsSelection & 0b10000000
+
+        # Get upms
+        master_upm = master.customParameters['Scale to UPM'] \
+            if master.customParameters['Scale to UPM']\
+            else font.upm
+        ttf_gf_upm = ttf_gf['head'].unitsPerEm
+
+        if master_use_typo_metrics and ttf_gf_use_typo_metrics:
+            master.customParameters['typoAscender'] = ttf_gf['OS/2'].sTypoAscender
+            master.customParameters['typoDescender'] = ttf_gf['OS/2'].sTypoDescender
+            master.customParameters['typoLineGap'] = ttf_gf['OS/2'].sTypoLineGap
+
+        elif master_use_typo_metrics and not ttf_gf_use_typo_metrics:
+            master.customParameters['typoAscender'] = ttf_gf['OS/2'].usWinAscent
+            master.customParameters['typoDescender'] = ttf_gf['OS/2'].usWinDescent
+            master.customParameters['typoLineGap'] = 0
+
+        master.customParameters['hheaAscender'] = ttf_gf['hhea'].ascent 
+        master.customParameters['hheaDescender'] = ttf_gf['hhea'].descent
+        master.customParameters['hheaLineGap'] = ttf_gf['hhea'].lineGap
+
+
+def set_win_asc_win_desc_to_bbox(font):
+    masters = font.masters
+    ymin, ymax = shortest_tallest_glyphs(font)
+    for master in masters:
+        master.customParameters['winDescent'] = abs(ymin)
+        master.customParameters['winAscent'] = ymax
 
 
 def main():
@@ -27,11 +83,11 @@ def main():
     font.customParameters['license'] = 'This Font Software is licensed under the SIL Open Font License, Version 1.1. This license is available with a FAQ at: http://scripts.sil.org/OFL'
     font.customParameters['licenseURL'] = 'http://scripts.sil.org/OFL'
     font.customParameters['fsType'] = []
-    # font.customParameters['Use Typo Metrics'] = True
+    font.customParameters['Use Typo Metrics'] = True
     font.customParameters['Disable Last Change'] = True
     font.customParameters['Use Line Breaks'] = True
 
-    # Delete unnecessary customParamters
+    # Delete unnecessary customParameters
     for key in BAD_PARAMETERS:
         del font.customParameters[key]
 
@@ -133,6 +189,11 @@ def main():
 
         if instance.name == 'Regular Italic':
             instance.name = 'Italic'
+
+    # Regressions fixing
+    ttfs_gf = download_gf_family(font.familyName)
+    visual_inherit_vertical_metrics(font, ttfs_gf)
+    set_win_asc_win_desc_to_bbox(font)
 
 
 if __name__ == '__main__':

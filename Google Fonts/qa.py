@@ -9,20 +9,21 @@ from unittest import TestProgram
 from runner import GlyphsTestRunner
 import os
 from ntpath import basename
-import urllib
-from urllib import urlopen
 from fontTools.ttLib import TTFont
 import csv
 from StringIO import StringIO
 from zipfile import ZipFile
 import re
-from vertmetrics import VERT_KEYS, shortest_tallest_glyphs
 from datetime import datetime
 import shutil
 import tempfile
 
-API_URL_PREFIX = 'https://fonts.google.com/download?family='
-UPSTREAM_REPO_URLS = 'http://tinyurl.com/kd9lort'
+from vertmetrics import VERT_KEYS, shortest_tallest_glyphs
+from utils import (
+    download_gf_family,
+    get_repos_doc,
+    UPSTREAM_REPO_URLS,
+)
 
 FONT_ATTRIBS = [
     'familyName',
@@ -109,39 +110,6 @@ STYLE_WEIGHTS = {
     'Black Italic': 900,
 }
 
-def _font_family_url(family_name):
-    '''Create the url to download a font family'''
-    family_name = str(family_name).replace(' ', '%20')
-    url = '%s%s' % (API_URL_PREFIX, family_name)
-    return url
-
-
-def url_200_response(family_name):
-    """Return a zipfile containing a font family hosted on fonts.google.com"""
-    family_url = _font_family_url(family_name)
-    request = urlopen(family_url)
-    if request.getcode() == 200:
-        return request
-    else:
-        return False
-
-
-def fonts_from_zip(zipfile):
-    '''return a list of fontTools.ttLib TTFont objects'''
-    ttfs = []
-    for file_name in zipfile.namelist():
-        if 'ttf' in file_name:
-            ttfs.append(TTFont(zipfile.open(file_name)))
-    return ttfs
-
-
-def get_repos_doc():
-    """return Google Repo doc"""
-    handle = urllib.urlopen(UPSTREAM_REPO_URLS)
-    ss = StringIO(handle.read())
-    reader = csv.DictReader(ss)
-    return reader
-
 
 class TestGlyphsFiles(unittest.TestCase):
     """Class loads/generates necessary files for unit tests."""
@@ -164,10 +132,7 @@ class TestGlyphsFiles(unittest.TestCase):
         """If the family already exists on Google Fonts, download and
         parse the ttfs into a GSFont object, else return None"""
         if not self._remote_font:
-            remote_fonts = url_200_response(self.fonts[0].familyName)
-            if remote_fonts:
-                family_zip = ZipFile(StringIO(remote_fonts.read()))
-                return fonts_from_zip(family_zip)
+            return download_gf_family(self.fonts[0].familyName)
         return None
 
     @property
@@ -220,13 +185,14 @@ class TestFontInfo(TestGlyphsFiles):
                      'Copyright %s The %s Project Authors (%s)\n\n'
                      'If the family has a RFN:\n'
                      'Copyright %s The %s Project Authors (%s), '
-                     'with Reserved Font Name "Play".') % (
+                     'with Reserved Font Name "%s".') % (
                         datetime.now().year,
                         font.familyName,
                         repo_git_url,
                         datetime.now().year,
                         font.familyName,
                         repo_git_url,
+                        font.familyName,
                     )
                 )
             else:
@@ -491,7 +457,8 @@ class TestRegressions(TestGlyphsFiles):
             remote_styles = self._get_font_styles(self.remote_font)
             missing = remote_styles - local_styles
             self.assertEqual(missing, set([]),
-                            'Font is missing instances [%s] are all .glyphs file open?' % ', '.join(missing))
+                            ('Font is missing instances [%s] are all '
+                             '.glyphs file open?') % ', '.join(missing))
 
     def test_version_number_has_advanced(self):
         """Check family version number is greater than GF version
@@ -573,6 +540,7 @@ class TestRegressions(TestGlyphsFiles):
                         "Local %s typoLineGap %s is not equal to remote %s typoLineGap %s" % (
                             style,
                             l_font['OS/2'].sTypoLineGap,
+                            style,
                             int(r_font['OS/2'].sTypoLineGap / float(r_upm) * l_upm),
                         )
                     )
@@ -583,16 +551,18 @@ class TestRegressions(TestGlyphsFiles):
                         "Local %s typoAscender %s is not equal to remote %s winAscent %s" % (
                             style,
                             l_font['OS/2'].sTypoAscender,
+                            style,
                             int(r_font['OS/2'].usWinAscent / float(r_upm) * l_upm),
                         )
                     )
                     self.assertEqual(
                         l_font['OS/2'].sTypoDescender,
                         - int(r_font['OS/2'].usWinDescent / float(r_upm) * l_upm),
-                        "Local %s typoDescender %s is not equal to remote %s winDescent %s" % (
+                        "Local %s typoDescender %s is not equal to remote %s winDescent -%s" % (
                             style,
                             l_font['OS/2'].sTypoDescender,
-                            - int(r_font['OS/2'].usWinDescent / float(r_upm) * l_upm),
+                            style,
+                            int(r_font['OS/2'].usWinDescent / float(r_upm) * l_upm),
                         )
                     )
                     self.assertEqual(
@@ -600,6 +570,7 @@ class TestRegressions(TestGlyphsFiles):
                         0,
                         "Local %s typoLineGap %s is not equal to 0" % (
                             style,
+                            l_font['OS/2'].sTypoLineGap
                         )
                     )
 
@@ -609,6 +580,7 @@ class TestRegressions(TestGlyphsFiles):
                     "Local %s hheaAscender %s is not equal to remote %s hheaAscender %s" % (
                         style,
                         l_font['hhea'].ascent, 
+                        style,
                         int(r_font['hhea'].ascent / float(r_upm) * l_upm),
                     )
                 )
@@ -618,6 +590,7 @@ class TestRegressions(TestGlyphsFiles):
                     "Local %s hheaDescender %s is not equal to remote %s hheaDescender %s" % (
                         style,
                         l_font['hhea'].descent,
+                        style,
                         int(r_font['hhea'].descent / float(r_upm) * l_upm),
                     )
                 )
@@ -627,6 +600,7 @@ class TestRegressions(TestGlyphsFiles):
                     "Local %s hheaLineGap %s is not equal to remote %s hheaLineGap %s" % (
                         style,
                         l_font['hhea'].lineGap,
+                        style,
                         int(r_font['hhea'].lineGap / float(r_upm) * l_upm),
                     )
                 )
@@ -634,8 +608,29 @@ class TestRegressions(TestGlyphsFiles):
 
 class TestVerticalMetrics(TestGlyphsFiles):
     
+    def test_family_has_vertical_metric_parameters(self):
+        """Check family has vertical metric custom parameters
+
+        Vertical metrics custom parameters are needed because these need to
+        be set manually. They should not be calculated by Glyphsapp."""
+        for font in self.fonts:
+            masters = font.masters
+            for master in masters:
+                master_vert_params = set([p.name for p in master.customParameters])
+                required_vert_params = set([p for p in VERT_KEYS])
+                missing_vert_params = required_vert_params - master_vert_params
+                self.assertEqual(
+                    set([]),
+                    missing_vert_params,
+                    ("%s master is missing the following vertical metric "
+                     "custom parameters [%s]") % (
+                         master.name,
+                         ', '.join(missing_vert_params),
+                     )
+                )
+
     def test_family_has_use_typo_metrics_enabled(self):
-        """Check family has 'Use Typo Metrics enabled'"""
+        """Check family has 'Use Typo Metrics' enabled"""
         for font in self.fonts:
             self.assertEqual(
                 font.customParameters['Use Typo Metrics'],
@@ -795,6 +790,6 @@ if __name__ == '__main__':
         os.path.join(os.path.dirname(__glyphsfile), '..')
     )
     if len(set([f.familyName for f in Glyphs.fonts])) == 1:
-        TestProgram(argv=['--verbose'], testRunner=GlyphsTestRunner, exit=False)
+        TestProgram(argv=['--verbose'], exit=False) #, testRunner=GlyphsTestRunner)
     else:
-        print 'Test one family at a time'
+        print 'Multiple Families open! Please only have one family open'

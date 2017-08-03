@@ -9,20 +9,21 @@ from unittest import TestProgram
 from runner import GlyphsTestRunner
 import os
 from ntpath import basename
-import urllib
-from urllib import urlopen
 from fontTools.ttLib import TTFont
 import csv
 from StringIO import StringIO
 from zipfile import ZipFile
 import re
-from vertmetrics import VERT_KEYS, shortest_tallest_glyphs
 from datetime import datetime
 import shutil
 import tempfile
 
-API_URL_PREFIX = 'https://fonts.google.com/download?family='
-UPSTREAM_REPO_URLS = 'http://tinyurl.com/kd9lort'
+from vertmetrics import VERT_KEYS, shortest_tallest_glyphs
+from utils import (
+    download_gf_family,
+    get_repos_doc,
+    UPSTREAM_REPO_URLS,
+)
 
 FONT_ATTRIBS = [
     'familyName',
@@ -109,39 +110,6 @@ STYLE_WEIGHTS = {
     'Black Italic': 900,
 }
 
-def _font_family_url(family_name):
-    '''Create the url to download a font family'''
-    family_name = str(family_name).replace(' ', '%20')
-    url = '%s%s' % (API_URL_PREFIX, family_name)
-    return url
-
-
-def url_200_response(family_name):
-    """Return a zipfile containing a font family hosted on fonts.google.com"""
-    family_url = _font_family_url(family_name)
-    request = urlopen(family_url)
-    if request.getcode() == 200:
-        return request
-    else:
-        return False
-
-
-def fonts_from_zip(zipfile):
-    '''return a list of fontTools.ttLib TTFont objects'''
-    ttfs = []
-    for file_name in zipfile.namelist():
-        if 'ttf' in file_name:
-            ttfs.append(TTFont(zipfile.open(file_name)))
-    return ttfs
-
-
-def get_repos_doc():
-    """return Google Repo doc"""
-    handle = urllib.urlopen(UPSTREAM_REPO_URLS)
-    ss = StringIO(handle.read())
-    reader = csv.DictReader(ss)
-    return reader
-
 
 class TestGlyphsFiles(unittest.TestCase):
     """Class loads/generates necessary files for unit tests."""
@@ -164,10 +132,7 @@ class TestGlyphsFiles(unittest.TestCase):
         """If the family already exists on Google Fonts, download and
         parse the ttfs into a GSFont object, else return None"""
         if not self._remote_font:
-            remote_fonts = url_200_response(self.fonts[0].familyName)
-            if remote_fonts:
-                family_zip = ZipFile(StringIO(remote_fonts.read()))
-                return fonts_from_zip(family_zip)
+            return download_gf_family(self.fonts[0].familyName)
         return None
 
     @property
@@ -655,7 +620,7 @@ class TestVerticalMetrics(TestGlyphsFiles):
                 required_vert_params = set([p for p in VERT_KEYS])
                 missing_vert_params = required_vert_params - master_vert_params
                 self.assertEqual(
-                    None,
+                    set([]),
                     missing_vert_params,
                     ("%s master is missing the following vertical metric "
                      "custom parameters [%s]") % (

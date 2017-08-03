@@ -492,7 +492,8 @@ class TestRegressions(TestGlyphsFiles):
             remote_styles = self._get_font_styles(self.remote_font)
             missing = remote_styles - local_styles
             self.assertEqual(missing, set([]),
-                            'Font is missing instances [%s] are all .glyphs file open?' % ', '.join(missing))
+                            ('Font is missing instances [%s] are all '
+                             '.glyphs file open?') % ', '.join(missing))
 
     def test_version_number_has_advanced(self):
         """Check family version number is greater than GF version
@@ -824,6 +825,6 @@ if __name__ == '__main__':
         os.path.join(os.path.dirname(__glyphsfile), '..')
     )
     if len(set([f.familyName for f in Glyphs.fonts])) == 1:
-        TestProgram(argv=['--verbose'], exit=False, testRunner=GlyphsTestRunner)
+        TestProgram(argv=['--verbose'], exit=False) #, testRunner=GlyphsTestRunner)
     else:
         print 'Multiple Families open! Please only have one family open'

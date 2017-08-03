@@ -788,6 +788,6 @@ if __name__ == '__main__':
         os.path.join(os.path.dirname(__glyphsfile), '..')
     )
     if len(set([f.familyName for f in Glyphs.fonts])) == 1:
-        TestProgram(argv=['--verbose'], exit=False) #, testRunner=GlyphsTestRunner)
+        TestProgram(argv=['--verbose'], exit=False, testRunner=GlyphsTestRunner)
     else:
         print 'Multiple Families open! Please only have one family open'

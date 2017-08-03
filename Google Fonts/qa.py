@@ -805,4 +805,4 @@ if __name__ == '__main__':
     if len(set([f.familyName for f in Glyphs.fonts])) == 1:
         TestProgram(argv=['--verbose'], exit=False, testRunner=GlyphsTestRunner)
     else:
-        print 'Test one family at a time'
+        print 'Multiple Families open! Please only have one family open'

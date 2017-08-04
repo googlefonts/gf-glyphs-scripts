@@ -176,31 +176,33 @@ class TestFontInfo(TestGlyphsFiles):
             )
 
             copyright_search = re.search(family_copyright_pattern, font.copyright)
-            if repo_git_url:
-                self.assertIsNotNone(
-                    copyright_search,
-                    ('Copyright string is incorrect.\n\n'
-                     'It must contain or be:\n'
-                     'Copyright %s The %s Project Authors (%s)\n\n'
-                     'If the family has a RFN:\n'
-                     'Copyright %s The %s Project Authors (%s), '
-                     'with Reserved Font Name "%s".') % (
-                        datetime.now().year,
-                        font.familyName,
-                        repo_git_url,
-                        datetime.now().year,
-                        font.familyName,
-                        repo_git_url,
-                        font.familyName,
-                    )
+            
+            self.assertIsNotNone(
+                repo_git_url,
+                ('Copyright does not contain git url.\n\n'
+                 'GF Upstream doc has no git url for family. '
+                 'If you have recently added it, it may take 5 minutes '
+                 'for the Google Sheet API to update it'
                 )
-            else:
-                raise Exception(
-                    ('GF Upstream doc has no git url for family. '
-                     'If you have recently added it, it may take 5 minutes '
-                     'for the Google Sheet API to update it'
-                    )
+            )
+
+            self.assertIsNotNone(
+                copyright_search,
+                ('Copyright string is incorrect.\n\n'
+                 'It must contain or be:\n'
+                 'Copyright %s The %s Project Authors (%s)\n\n'
+                 'If the family has a RFN:\n'
+                 'Copyright %s The %s Project Authors (%s), '
+                 'with Reserved Font Name "%s".') % (
+                    datetime.now().year,
+                    font.familyName,
+                    repo_git_url,
+                    datetime.now().year,
+                    font.familyName,
+                    repo_git_url,
+                    font.familyName,
                 )
+            )
 
     def test_style_names(self):
         """Check instances have the correct name for the GF API"""

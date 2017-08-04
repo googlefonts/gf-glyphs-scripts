@@ -23,6 +23,7 @@ from vertmetrics import VERT_KEYS, shortest_tallest_glyphs
 from utils import (
     download_gf_family,
     UPSTREAM_REPO_URLS,
+    UPSTREAM_REPO_DOC,
     RepoDoc
 )
 
@@ -181,8 +182,8 @@ class TestFontInfo(TestGlyphsFiles):
                 repo_git_url,
                 ('Copyright does not contain git url.\n\n'
                  'GF Upstream doc has no git url for family. '
-                 'If you have recently added it, it may take 5 minutes '
-                 'for the Google Sheet API to update it'
+                 'If the family has been recently added, it may take 5 minutes '
+                 'for the Google Sheet API to update it.'
                 )
             )
 
@@ -738,7 +739,7 @@ class TestRepositoryStructure(TestGlyphsFiles):
                 found, 
                 ("Family is not listed in the GF Master repo doc, %s.\n\n"
                  "Listing the family helps us keep track of it and ensure "
-                 "there is one original source") % UPSTREAM_REPO_URLS
+                 "there is one original source") % UPSTREAM_REPO_DOC
             )
 
     def test_fonts_dir_exists(self):

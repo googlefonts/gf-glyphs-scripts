@@ -6,6 +6,7 @@ import csv
 
 
 API_URL_PREFIX = 'https://fonts.google.com/download?family='
+UPSTREAM_REPO_DOC = 'http://tinyurl.com/kflp3k7'
 UPSTREAM_REPO_URLS = 'http://tinyurl.com/kd9lort'
 
 

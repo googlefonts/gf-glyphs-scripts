@@ -11,6 +11,7 @@ from utils import (
 )
 from datetime import datetime
 from vertmetrics import shortest_tallest_glyphs
+import templates
 
 BAD_PARAMETERS = [
     'openTypeNameLicense',
@@ -62,6 +63,14 @@ def gen_copyright_string(font):
             current_rfn.group(0)
         )
     font.copyright = new_copyright
+
+
+def gen_ofl(copyright_string):
+
+    ofl_text = templates.ofl_text.replace('{{ copyright_string }}', copyright_string)
+    ofl_path = os.path.join(project_dir, 'OFL.txt')
+    with open(ofl_path, 'w') as ofl_doc:
+        ofl_doc.write(ofl_text)
 
 
 def visual_inherit_vertical_metrics(font, ttfs_gf):
@@ -238,9 +247,16 @@ def main():
     visual_inherit_vertical_metrics(font, ttfs_gf)
     set_win_asc_win_desc_to_bbox(font)
 
+    # txt file generation
+    gen_ofl(font.copyright)
+
 
 if __name__ == '__main__':
     Glyphs.showMacroWindow()
+    __glyphsfile = Glyphs.font.filepath
+    project_dir = os.path.abspath(
+        os.path.join(os.path.dirname(__glyphsfile), '..')
+    )
     main()
     print 'Fonts updated to GF spec'
 

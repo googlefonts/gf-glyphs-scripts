@@ -194,7 +194,12 @@ class TestFontInfo(TestGlyphsFiles):
                     )
                 )
             else:
-                raise Exception('GF Upstream doc has no git url for family')
+                raise Exception(
+                    ('GF Upstream doc has no git url for family. '
+                     'If you have recently added it, it may take 5 minutes '
+                     'for the Google Sheet API to update it'
+                    )
+                )
 
     def test_style_names(self):
         """Check instances have the correct name for the GF API"""

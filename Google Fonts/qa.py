@@ -789,6 +789,20 @@ class TestRepositoryStructure(TestGlyphsFiles):
              "as a reference to make your own.")
         )
 
+    def test_ofl_first_line_matches_copyright(self):
+        """Check OFL.txt first line matches the copyright string"""
+        for font in self.fonts:
+            ofl_txt_path = os.path.join(project_dir, 'OFL.txt')
+            with open(ofl_txt_path) as ofl_doc:
+                ofl_copyright = ofl_doc.readlines()[0][:-1] # ignore linebreak
+                self.assertEqual(
+                    font.copyright,
+                    ofl_copyright,
+                    ("OFL.txt and font copyright do not match.\n\n"
+                     "OFL copyright: %s\n"
+                     "Font copyright: %s\n") % (font.copyright, ofl_copyright)
+                )
+
 
 if __name__ == '__main__':
     Glyphs.showMacroWindow()

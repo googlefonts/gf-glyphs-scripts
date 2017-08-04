@@ -203,6 +203,8 @@ def main():
                 instance.linkStyle = instance.weight
             else:
                 instance.linkStyle = ''
+        else:
+            instance.linkStyle = ''
 
         # Seperate non Reg/Medium weights into their own family
         if instance.width != 'Medium (normal)':

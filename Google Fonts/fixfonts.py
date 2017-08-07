@@ -3,11 +3,13 @@
 Fix/add requirements from ProjectChecklist.md
 '''
 import re
+from math import ceil
+
 from utils import (
     download_gf_family,
     ttf_family_style_name,
     RepoDoc,
-    UPSTREAM_REPO_URLS
+    UPSTREAM_REPO_DOC
 )
 from datetime import datetime
 from vertmetrics import shortest_tallest_glyphs
@@ -44,8 +46,9 @@ def gen_copyright_string(font):
     repo_doc = RepoDoc()
     git_url = repo_doc.family_url(font.familyName)
     if not git_url:
-        print ('Cannot auto gen copyright string. Git url not listed in '
-               'Repo Doc, %s') % UPSTREAM_REPO_URLS
+        print ('WARNING: Cannot auto gen copyright string. Git url not listed in '
+               'Repo Doc, %s. If family was recently added, it may take a while '
+               'for the GF sheet API to update it.') % UPSTREAM_REPO_DOC
         return
 
     if not current_rfn:
@@ -103,18 +106,23 @@ def visual_inherit_vertical_metrics(font, ttfs_gf):
         ttf_gf_upm = ttf_gf['head'].unitsPerEm
 
         if master_use_typo_metrics and ttf_gf_use_typo_metrics:
-            master.customParameters['typoAscender'] = ttf_gf['OS/2'].sTypoAscender
-            master.customParameters['typoDescender'] = ttf_gf['OS/2'].sTypoDescender
-            master.customParameters['typoLineGap'] = ttf_gf['OS/2'].sTypoLineGap
+
+            master.customParameters['typoAscender'] = _norm(ttf_gf['OS/2'].sTypoAscender, ttf_gf_upm, master_upm)
+            master.customParameters['typoDescender'] = _norm(ttf_gf['OS/2'].sTypoDescender, ttf_gf_upm, master_upm)
+            master.customParameters['typoLineGap'] = _norm(ttf_gf['OS/2'].sTypoLineGap, ttf_gf_upm, master_upm)
 
         elif master_use_typo_metrics and not ttf_gf_use_typo_metrics:
-            master.customParameters['typoAscender'] = ttf_gf['OS/2'].usWinAscent
-            master.customParameters['typoDescender'] = ttf_gf['OS/2'].usWinDescent
+            master.customParameters['typoAscender'] = _norm(ttf_gf['OS/2'].usWinAscent, ttf_gf_upm, master_upm)
+            master.customParameters['typoDescender'] = _norm(ttf_gf['OS/2'].usWinDescent, ttf_gf_upm, master_upm)
             master.customParameters['typoLineGap'] = 0
 
-        master.customParameters['hheaAscender'] = ttf_gf['hhea'].ascent 
-        master.customParameters['hheaDescender'] = ttf_gf['hhea'].descent
-        master.customParameters['hheaLineGap'] = ttf_gf['hhea'].lineGap
+        master.customParameters['hheaAscender'] = _norm(ttf_gf['hhea'].ascent, ttf_gf_upm, master_upm)
+        master.customParameters['hheaDescender'] = _norm(ttf_gf['hhea'].descent, ttf_gf_upm, master_upm)
+        master.customParameters['hheaLineGap'] = _norm(ttf_gf['hhea'].lineGap, ttf_gf_upm, master_upm)
+
+
+def _norm(key, gf_upm, l_upm):
+    return int(ceil(key / float(gf_upm) * float(l_upm)))
 
 
 def set_win_asc_win_desc_to_bbox(font):

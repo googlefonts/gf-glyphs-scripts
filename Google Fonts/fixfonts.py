@@ -3,13 +3,12 @@
 Fix/add requirements from ProjectChecklist.md
 '''
 import re
-from math import ceil
-
 from utils import (
     download_gf_family,
     ttf_family_style_name,
     RepoDoc,
-    UPSTREAM_REPO_DOC
+    UPSTREAM_REPO_DOC,
+    norm_m
 )
 from datetime import datetime
 from vertmetrics import shortest_tallest_glyphs
@@ -107,22 +106,18 @@ def visual_inherit_vertical_metrics(font, ttfs_gf):
 
         if master_use_typo_metrics and ttf_gf_use_typo_metrics:
 
-            master.customParameters['typoAscender'] = _norm(ttf_gf['OS/2'].sTypoAscender, ttf_gf_upm, master_upm)
-            master.customParameters['typoDescender'] = _norm(ttf_gf['OS/2'].sTypoDescender, ttf_gf_upm, master_upm)
-            master.customParameters['typoLineGap'] = _norm(ttf_gf['OS/2'].sTypoLineGap, ttf_gf_upm, master_upm)
+            master.customParameters['typoAscender'] = norm_m(ttf_gf['OS/2'].sTypoAscender, ttf_gf_upm, master_upm)
+            master.customParameters['typoDescender'] = norm_m(ttf_gf['OS/2'].sTypoDescender, ttf_gf_upm, master_upm)
+            master.customParameters['typoLineGap'] = norm_m(ttf_gf['OS/2'].sTypoLineGap, ttf_gf_upm, master_upm)
 
         elif master_use_typo_metrics and not ttf_gf_use_typo_metrics:
-            master.customParameters['typoAscender'] = _norm(ttf_gf['OS/2'].usWinAscent, ttf_gf_upm, master_upm)
-            master.customParameters['typoDescender'] = _norm(ttf_gf['OS/2'].usWinDescent, ttf_gf_upm, master_upm)
+            master.customParameters['typoAscender'] = norm_m(ttf_gf['OS/2'].usWinAscent, ttf_gf_upm, master_upm)
+            master.customParameters['typoDescender'] = norm_m(ttf_gf['OS/2'].usWinDescent, ttf_gf_upm, master_upm)
             master.customParameters['typoLineGap'] = 0
 
-        master.customParameters['hheaAscender'] = _norm(ttf_gf['hhea'].ascent, ttf_gf_upm, master_upm)
-        master.customParameters['hheaDescender'] = _norm(ttf_gf['hhea'].descent, ttf_gf_upm, master_upm)
-        master.customParameters['hheaLineGap'] = _norm(ttf_gf['hhea'].lineGap, ttf_gf_upm, master_upm)
-
-
-def _norm(key, gf_upm, l_upm):
-    return int(ceil(key / float(gf_upm) * float(l_upm)))
+        master.customParameters['hheaAscender'] = norm_m(ttf_gf['hhea'].ascent, ttf_gf_upm, master_upm)
+        master.customParameters['hheaDescender'] = norm_m(ttf_gf['hhea'].descent, ttf_gf_upm, master_upm)
+        master.customParameters['hheaLineGap'] = norm_m(ttf_gf['hhea'].lineGap, ttf_gf_upm, master_upm)
 
 
 def set_win_asc_win_desc_to_bbox(font):

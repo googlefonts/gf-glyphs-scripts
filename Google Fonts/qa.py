@@ -526,51 +526,51 @@ class TestRegressions(TestGlyphsFiles):
                 if r_use_typo_metrics and l_use_typo_metrics:
                     self.assertEqual(
                         l_font['OS/2'].sTypoAscender, 
-                        int(ceil(r_font['OS/2'].sTypoAscender / float(r_upm) * l_upm)),
+                        norm_m(r_font['OS/2'].sTypoAscender, r_upm, l_upm),
                         "Local %s typoAscender %s is not equal to remote %s typoAscender %s" % (
                             style,
                             l_font['OS/2'].sTypoAscender,
-                            int(ceil(r_font['OS/2'].sTypoAscender / float(r_upm) * l_upm)),
+                            norm_m(r_font['OS/2'].sTypoAscender, r_upm, l_upm),
                         )
                     )
                     self.assertEqual(
                         l_font['OS/2'].sTypoDescender, 
-                        int(ceil(r_font['OS/2'].sTypoDescender / float(r_upm) * l_upm)),
+                        norm_m(r_font['OS/2'].sTypoDescender, r_upm, l_upm),
                         "Local %s typoDescender %s is not equal to remote %s typoDescender %s" % (
                             style,
                             l_font['OS/2'].sTypoDescender,
-                            int(ceil(r_font['OS/2'].sTypoDescender / float(r_upm) * l_upm)),
+                            norm_m(r_font['OS/2'].sTypoDescender, r_upm, l_upm),
                         )
                     )
                     self.assertEqual(
                         l_font['OS/2'].sTypoLineGap, 
-                        int(r_font['OS/2'].sTypoLineGap / float(r_upm) * l_upm),
+                        norm_m(r_font['OS/2'].sTypoLineGap, r_upm, l_upm),
                         "Local %s typoLineGap %s is not equal to remote %s typoLineGap %s" % (
                             style,
                             l_font['OS/2'].sTypoLineGap,
                             style,
-                            int(ceil(r_font['OS/2'].sTypoLineGap / float(r_upm) * l_upm)),
+                            norm_m(r_font['OS/2'].sTypoLineGap, r_upm, l_upm),
                         )
                     )
                 elif l_use_typo_metrics and not r_use_typo_metrics:
                     self.assertEqual(
                         l_font['OS/2'].sTypoAscender,
-                        int(ceil(r_font['OS/2'].usWinAscent / float(r_upm) * l_upm)),
+                        norm_m(r_font['OS/2'].usWinAscent, r_upm, l_upm),
                         "Local %s typoAscender %s is not equal to remote %s winAscent %s" % (
                             style,
                             l_font['OS/2'].sTypoAscender,
                             style,
-                            int(ceil(r_font['OS/2'].usWinAscent / float(r_upm) * l_upm)),
+                            norm_m(r_font['OS/2'].usWinAscent, r_upm, l_upm),
                         )
                     )
                     self.assertEqual(
                         l_font['OS/2'].sTypoDescender,
-                        - int(ceil(r_font['OS/2'].usWinDescent / float(r_upm) * l_upm)),
+                        - norm_m(r_font['OS/2'].usWinDescent, r_upm, l_upm),
                         "Local %s typoDescender %s is not equal to remote %s winDescent -%s" % (
                             style,
                             l_font['OS/2'].sTypoDescender,
                             style,
-                            int(ceil(r_font['OS/2'].usWinDescent / float(r_upm) * l_upm)),
+                            norm_m(r_font['OS/2'].usWinDescent, r_upm, l_upm),
                         )
                     )
                     self.assertEqual(
@@ -584,32 +584,32 @@ class TestRegressions(TestGlyphsFiles):
 
                 self.assertEqual(
                     l_font['hhea'].ascent, 
-                    int(ceil(r_font['hhea'].ascent / float(r_upm) * l_upm)),
+                    norm_m(r_font['hhea'].ascent, r_upm, l_upm),
                     "Local %s hheaAscender %s is not equal to remote %s hheaAscender %s" % (
                         style,
                         l_font['hhea'].ascent, 
                         style,
-                        int(ceil(r_font['hhea'].ascent / float(r_upm) * l_upm)),
+                        norm_m(r_font['hhea'].ascent, r_upm, l_upm),
                     )
                 )
                 self.assertEqual(
                     l_font['hhea'].descent, 
-                    int(ceil(r_font['hhea'].descent / float(r_upm) * l_upm)),
+                    norm_m(r_font['hhea'].descent, r_upm, l_upm),
                     "Local %s hheaDescender %s is not equal to remote %s hheaDescender %s" % (
                         style,
                         l_font['hhea'].descent,
                         style,
-                        int(ceil(r_font['hhea'].descent / float(r_upm) * l_upm)),
+                        norm_m(r_font['hhea'].descent, r_upm, l_upm),
                     )
                 )
                 self.assertEqual(
                     l_font['hhea'].lineGap,
-                    int(ceil(r_font['hhea'].lineGap / float(r_upm) * l_upm)),
+                    norm_m(r_font['hhea'].lineGap, r_upm, l_upm),
                     "Local %s hheaLineGap %s is not equal to remote %s hheaLineGap %s" % (
                         style,
                         l_font['hhea'].lineGap,
                         style,
-                        int(ceil(r_font['hhea'].lineGap / float(r_upm) * l_upm)),
+                        norm_m(r_font['hhea'].lineGap, r_upm, l_upm),
                     )
                 )
 

@@ -7,10 +7,12 @@ from utils import (
     download_gf_family,
     ttf_family_style_name,
     RepoDoc,
-    UPSTREAM_REPO_URLS
+    UPSTREAM_REPO_DOC,
+    norm_m
 )
 from datetime import datetime
 from vertmetrics import shortest_tallest_glyphs
+import templates
 
 BAD_PARAMETERS = [
     'openTypeNameLicense',
@@ -43,8 +45,9 @@ def gen_copyright_string(font):
     repo_doc = RepoDoc()
     git_url = repo_doc.family_url(font.familyName)
     if not git_url:
-        print ('Cannot auto gen copyright string. Git url not listed in '
-               'Repo Doc, %s') % UPSTREAM_REPO_URLS
+        print ('WARNING: Cannot auto gen copyright string. Git url not listed in '
+               'Repo Doc, %s. If family was recently added, it may take a while '
+               'for the GF sheet API to update it.') % UPSTREAM_REPO_DOC
         return
 
     if not current_rfn:
@@ -62,6 +65,14 @@ def gen_copyright_string(font):
             current_rfn.group(0)
         )
     font.copyright = new_copyright
+
+
+def gen_ofl(copyright_string):
+
+    ofl_text = templates.ofl_text.replace('{{ copyright_string }}', copyright_string)
+    ofl_path = os.path.join(project_dir, 'OFL.txt')
+    with open(ofl_path, 'w') as ofl_doc:
+        ofl_doc.write(ofl_text)
 
 
 def visual_inherit_vertical_metrics(font, ttfs_gf):
@@ -94,18 +105,19 @@ def visual_inherit_vertical_metrics(font, ttfs_gf):
         ttf_gf_upm = ttf_gf['head'].unitsPerEm
 
         if master_use_typo_metrics and ttf_gf_use_typo_metrics:
-            master.customParameters['typoAscender'] = ttf_gf['OS/2'].sTypoAscender
-            master.customParameters['typoDescender'] = ttf_gf['OS/2'].sTypoDescender
-            master.customParameters['typoLineGap'] = ttf_gf['OS/2'].sTypoLineGap
+
+            master.customParameters['typoAscender'] = norm_m(ttf_gf['OS/2'].sTypoAscender, ttf_gf_upm, master_upm)
+            master.customParameters['typoDescender'] = norm_m(ttf_gf['OS/2'].sTypoDescender, ttf_gf_upm, master_upm)
+            master.customParameters['typoLineGap'] = norm_m(ttf_gf['OS/2'].sTypoLineGap, ttf_gf_upm, master_upm)
 
         elif master_use_typo_metrics and not ttf_gf_use_typo_metrics:
-            master.customParameters['typoAscender'] = ttf_gf['OS/2'].usWinAscent
-            master.customParameters['typoDescender'] = ttf_gf['OS/2'].usWinDescent
+            master.customParameters['typoAscender'] = norm_m(ttf_gf['OS/2'].usWinAscent, ttf_gf_upm, master_upm)
+            master.customParameters['typoDescender'] = norm_m(ttf_gf['OS/2'].usWinDescent, ttf_gf_upm, master_upm)
             master.customParameters['typoLineGap'] = 0
 
-        master.customParameters['hheaAscender'] = ttf_gf['hhea'].ascent 
-        master.customParameters['hheaDescender'] = ttf_gf['hhea'].descent
-        master.customParameters['hheaLineGap'] = ttf_gf['hhea'].lineGap
+        master.customParameters['hheaAscender'] = norm_m(ttf_gf['hhea'].ascent, ttf_gf_upm, master_upm)
+        master.customParameters['hheaDescender'] = norm_m(ttf_gf['hhea'].descent, ttf_gf_upm, master_upm)
+        master.customParameters['hheaLineGap'] = norm_m(ttf_gf['hhea'].lineGap, ttf_gf_upm, master_upm)
 
 
 def set_win_asc_win_desc_to_bbox(font):
@@ -203,6 +215,8 @@ def main():
                 instance.linkStyle = instance.weight
             else:
                 instance.linkStyle = ''
+        else:
+            instance.linkStyle = ''
 
         # Seperate non Reg/Medium weights into their own family
         if instance.width != 'Medium (normal)':
@@ -236,9 +250,16 @@ def main():
     visual_inherit_vertical_metrics(font, ttfs_gf)
     set_win_asc_win_desc_to_bbox(font)
 
+    # txt file generation
+    gen_ofl(font.copyright)
+
 
 if __name__ == '__main__':
     Glyphs.showMacroWindow()
+    __glyphsfile = Glyphs.font.filepath
+    project_dir = os.path.abspath(
+        os.path.join(os.path.dirname(__glyphsfile), '..')
+    )
     main()
     print 'Fonts updated to GF spec'
 

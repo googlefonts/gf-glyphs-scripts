@@ -17,11 +17,13 @@ import re
 from datetime import datetime
 import shutil
 import tempfile
+from math import ceil
 
 from vertmetrics import VERT_KEYS, shortest_tallest_glyphs
 from utils import (
     download_gf_family,
     UPSTREAM_REPO_URLS,
+    UPSTREAM_REPO_DOC,
     RepoDoc
 )
 
@@ -175,26 +177,33 @@ class TestFontInfo(TestGlyphsFiles):
             )
 
             copyright_search = re.search(family_copyright_pattern, font.copyright)
-            if repo_git_url:
-                self.assertIsNotNone(
-                    copyright_search,
-                    ('Copyright string is incorrect.\n\n'
-                     'It must contain or be:\n'
-                     'Copyright %s The %s Project Authors (%s)\n\n'
-                     'If the family has a RFN:\n'
-                     'Copyright %s The %s Project Authors (%s), '
-                     'with Reserved Font Name "%s".') % (
-                        datetime.now().year,
-                        font.familyName,
-                        repo_git_url,
-                        datetime.now().year,
-                        font.familyName,
-                        repo_git_url,
-                        font.familyName,
-                    )
+            
+            self.assertIsNotNone(
+                repo_git_url,
+                ('Copyright does not contain git url.\n\n'
+                 'GF Upstream doc has no git url for family. '
+                 'If the family has been recently added, it may take 5 minutes '
+                 'for the Google Sheet API to update it.'
                 )
-            else:
-                raise Exception('GF Upstream doc has no git url for family')
+            )
+
+            self.assertIsNotNone(
+                copyright_search,
+                ('Copyright string is incorrect.\n\n'
+                 'It must contain or be:\n'
+                 'Copyright %s The %s Project Authors (%s)\n\n'
+                 'If the family has a RFN:\n'
+                 'Copyright %s The %s Project Authors (%s), '
+                 'with Reserved Font Name "%s".') % (
+                    datetime.now().year,
+                    font.familyName,
+                    repo_git_url,
+                    datetime.now().year,
+                    font.familyName,
+                    repo_git_url,
+                    font.familyName,
+                )
+            )
 
     def test_style_names(self):
         """Check instances have the correct name for the GF API"""
@@ -517,51 +526,51 @@ class TestRegressions(TestGlyphsFiles):
                 if r_use_typo_metrics and l_use_typo_metrics:
                     self.assertEqual(
                         l_font['OS/2'].sTypoAscender, 
-                        int(r_font['OS/2'].sTypoAscender / float(r_upm) * l_upm),
+                        norm_m(r_font['OS/2'].sTypoAscender, r_upm, l_upm),
                         "Local %s typoAscender %s is not equal to remote %s typoAscender %s" % (
                             style,
                             l_font['OS/2'].sTypoAscender,
-                            int(r_font['OS/2'].sTypoAscender / float(r_upm) * l_upm),
+                            norm_m(r_font['OS/2'].sTypoAscender, r_upm, l_upm),
                         )
                     )
                     self.assertEqual(
                         l_font['OS/2'].sTypoDescender, 
-                        int(r_font['OS/2'].sTypoDescender / float(r_upm) * l_upm),
+                        norm_m(r_font['OS/2'].sTypoDescender, r_upm, l_upm),
                         "Local %s typoDescender %s is not equal to remote %s typoDescender %s" % (
                             style,
                             l_font['OS/2'].sTypoDescender,
-                            int(r_font['OS/2'].sTypoDescender / float(r_upm) * l_upm),
+                            norm_m(r_font['OS/2'].sTypoDescender, r_upm, l_upm),
                         )
                     )
                     self.assertEqual(
                         l_font['OS/2'].sTypoLineGap, 
-                        int(r_font['OS/2'].sTypoLineGap / float(r_upm) * l_upm),
+                        norm_m(r_font['OS/2'].sTypoLineGap, r_upm, l_upm),
                         "Local %s typoLineGap %s is not equal to remote %s typoLineGap %s" % (
                             style,
                             l_font['OS/2'].sTypoLineGap,
                             style,
-                            int(r_font['OS/2'].sTypoLineGap / float(r_upm) * l_upm),
+                            norm_m(r_font['OS/2'].sTypoLineGap, r_upm, l_upm),
                         )
                     )
                 elif l_use_typo_metrics and not r_use_typo_metrics:
                     self.assertEqual(
                         l_font['OS/2'].sTypoAscender,
-                        int(r_font['OS/2'].usWinAscent / float(r_upm) * l_upm),
+                        norm_m(r_font['OS/2'].usWinAscent, r_upm, l_upm),
                         "Local %s typoAscender %s is not equal to remote %s winAscent %s" % (
                             style,
                             l_font['OS/2'].sTypoAscender,
                             style,
-                            int(r_font['OS/2'].usWinAscent / float(r_upm) * l_upm),
+                            norm_m(r_font['OS/2'].usWinAscent, r_upm, l_upm),
                         )
                     )
                     self.assertEqual(
                         l_font['OS/2'].sTypoDescender,
-                        - int(r_font['OS/2'].usWinDescent / float(r_upm) * l_upm),
+                        - norm_m(r_font['OS/2'].usWinDescent, r_upm, l_upm),
                         "Local %s typoDescender %s is not equal to remote %s winDescent -%s" % (
                             style,
                             l_font['OS/2'].sTypoDescender,
                             style,
-                            int(r_font['OS/2'].usWinDescent / float(r_upm) * l_upm),
+                            norm_m(r_font['OS/2'].usWinDescent, r_upm, l_upm),
                         )
                     )
                     self.assertEqual(
@@ -575,32 +584,32 @@ class TestRegressions(TestGlyphsFiles):
 
                 self.assertEqual(
                     l_font['hhea'].ascent, 
-                    int(r_font['hhea'].ascent / float(r_upm) * l_upm),
+                    norm_m(r_font['hhea'].ascent, r_upm, l_upm),
                     "Local %s hheaAscender %s is not equal to remote %s hheaAscender %s" % (
                         style,
                         l_font['hhea'].ascent, 
                         style,
-                        int(r_font['hhea'].ascent / float(r_upm) * l_upm),
+                        norm_m(r_font['hhea'].ascent, r_upm, l_upm),
                     )
                 )
                 self.assertEqual(
                     l_font['hhea'].descent, 
-                    int(r_font['hhea'].descent / float(r_upm) * l_upm),
+                    norm_m(r_font['hhea'].descent, r_upm, l_upm),
                     "Local %s hheaDescender %s is not equal to remote %s hheaDescender %s" % (
                         style,
                         l_font['hhea'].descent,
                         style,
-                        int(r_font['hhea'].descent / float(r_upm) * l_upm),
+                        norm_m(r_font['hhea'].descent, r_upm, l_upm),
                     )
                 )
                 self.assertEqual(
                     l_font['hhea'].lineGap,
-                    int(r_font['hhea'].lineGap / float(r_upm) * l_upm),
+                    norm_m(r_font['hhea'].lineGap, r_upm, l_upm),
                     "Local %s hheaLineGap %s is not equal to remote %s hheaLineGap %s" % (
                         style,
                         l_font['hhea'].lineGap,
                         style,
-                        int(r_font['hhea'].lineGap / float(r_upm) * l_upm),
+                        norm_m(r_font['hhea'].lineGap, r_upm, l_upm),
                     )
                 )
 
@@ -730,7 +739,7 @@ class TestRepositoryStructure(TestGlyphsFiles):
                 found, 
                 ("Family is not listed in the GF Master repo doc, %s.\n\n"
                  "Listing the family helps us keep track of it and ensure "
-                 "there is one original source") % UPSTREAM_REPO_URLS
+                 "there is one original source") % UPSTREAM_REPO_DOC
             )
 
     def test_fonts_dir_exists(self):
@@ -779,6 +788,20 @@ class TestRepositoryStructure(TestGlyphsFiles):
              "Use https://raw.githubusercontent.com/Gue3bara/Cairo/master/AUTHORS.txt "
              "as a reference to make your own.")
         )
+
+    def test_ofl_first_line_matches_copyright(self):
+        """Check OFL.txt first line matches the copyright string"""
+        for font in self.fonts:
+            ofl_txt_path = os.path.join(project_dir, 'OFL.txt')
+            with open(ofl_txt_path) as ofl_doc:
+                ofl_copyright = ofl_doc.readlines()[0][:-1] # ignore linebreak
+                self.assertEqual(
+                    font.copyright,
+                    ofl_copyright,
+                    ("OFL.txt and font copyright do not match.\n\n"
+                     "OFL copyright: %s\n"
+                     "Font copyright: %s\n") % (font.copyright, ofl_copyright)
+                )
 
 
 if __name__ == '__main__':

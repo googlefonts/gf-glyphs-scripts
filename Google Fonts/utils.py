@@ -3,9 +3,10 @@ from StringIO import StringIO
 from zipfile import ZipFile
 from urllib import urlopen
 import csv
-
+from math import ceil
 
 API_URL_PREFIX = 'https://fonts.google.com/download?family='
+UPSTREAM_REPO_DOC = 'http://tinyurl.com/kflp3k7'
 UPSTREAM_REPO_URLS = 'http://tinyurl.com/kd9lort'
 
 
@@ -27,6 +28,10 @@ def convert_camelcase(name, seperator=' '):
     """ExtraCondensed -> Extra Condensed"""
     return re.sub('(?!^)([A-Z]|[0-9]+)', r'%s\1' % seperator, name)
 
+
+def norm_m(key, gf_upm, l_upm):
+    """Normalise an integer"""
+    return int(ceil(key / float(gf_upm) * float(l_upm)))
 
 def _font_family_url(family_name):
     '''Create the url to download a font family'''

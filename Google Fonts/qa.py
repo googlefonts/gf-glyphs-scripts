@@ -24,7 +24,8 @@ from utils import (
     download_gf_family,
     UPSTREAM_REPO_URLS,
     UPSTREAM_REPO_DOC,
-    RepoDoc
+    RepoDoc,
+    norm_m
 )
 
 FONT_ATTRIBS = [

@@ -2,6 +2,7 @@
 '''
 Fix/add requirements from ProjectChecklist.md
 '''
+import os
 import re
 from utils import (
     download_gf_family,

@@ -37,4 +37,4 @@ class GlyphsTestResult(TestResult):
                 if not error.endswith('\n'):
                     error += '\n'
                 msgLines.append(STDERR_LINE % error)
-        return ''.join(msgLines)
+        return ''.join(map(str, msgLines))

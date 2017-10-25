@@ -9,7 +9,8 @@ from utils import (
     ttf_family_style_name,
     RepoDoc,
     UPSTREAM_REPO_DOC,
-    norm_m
+    norm_m,
+    convert_camelcase
 )
 from datetime import datetime
 from vertmetrics import shortest_tallest_glyphs
@@ -210,23 +211,31 @@ def main():
 
     # fix instance names to pass gf spec
     for i, instance in enumerate(instances):
+        if 'Oblique' in instance.name:
+            instance.name = instance.name.replace('Oblique', 'Italic')
         if 'Italic' in instance.name:
             instance.isItalic = True
+            instance.name = instance.weight + ' Italic'
             if instance.weight != 'Bold' and instance.weight != 'Regular':
                 instance.linkStyle = instance.weight
             else:
                 instance.linkStyle = ''
         else:
+            instance.name = instance.weight
             instance.linkStyle = ''
 
-        # Seperate non Reg/Medium weights into their own family
+        # Seperate non Reg/Medium widths into their own family
         if instance.width != 'Medium (normal)':
             if instance.width == 'Semi Expanded':
                 family_suffix = instance.width
             else:
-                family_suffix = _convert_camelcase(instance.width)
+                family_suffix = convert_camelcase(instance.width)
             sub_family_name = '%s %s' % (font.familyName, family_suffix)
             instance.customParameters['familyName'] = sub_family_name
+            if 'Italic' in instance.name:
+                instance.name = instance.weight + ' Italic'
+            else:
+                instance.name = instance.weight
 
         if instance.weight == 'Bold':
             instance.isBold = True
@@ -248,7 +257,8 @@ def main():
 
     # Regressions fixing
     ttfs_gf = download_gf_family(font.familyName)
-    visual_inherit_vertical_metrics(font, ttfs_gf)
+    if ttfs_gf:
+        visual_inherit_vertical_metrics(font, ttfs_gf)
     set_win_asc_win_desc_to_bbox(font)
 
     # txt file generation

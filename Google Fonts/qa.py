@@ -270,7 +270,7 @@ class TestFontInfo(TestGlyphsFiles):
         from this rule."""
         for font in self.fonts:
             instances = font.instances
-            if len(instances) == 1:
+            if len(instances) == 1 and self.fonts < 2:
                 instance = instances[0]
                 self.assertEqual(
                     instance.name,

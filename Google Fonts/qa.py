@@ -20,13 +20,7 @@ import tempfile
 from math import ceil
 
 from vertmetrics import VERT_KEYS, shortest_tallest_glyphs
-from utils import (
-    download_gf_family,
-    UPSTREAM_REPO_URLS,
-    UPSTREAM_REPO_DOC,
-    RepoDoc,
-    norm_m
-)
+from utils import *
 
 FONT_ATTRIBS = [
     'familyName',

@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 from unittest import TestResult
 
 
@@ -37,4 +38,4 @@ class GlyphsTestResult(TestResult):
                 if not error.endswith('\n'):
                     error += '\n'
                 msgLines.append(STDERR_LINE % error)
-        return ''.join(map(str, msgLines))
+        return ''.join(map(str, msgLines)).encode('utf-8')

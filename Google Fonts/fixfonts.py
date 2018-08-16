@@ -248,7 +248,8 @@ def main():
 
     # Regressions fixing
     ttfs_gf = download_gf_family(font.familyName)
-    visual_inherit_vertical_metrics(font, ttfs_gf)
+    if ttfs_gf:
+        visual_inherit_vertical_metrics(font, ttfs_gf)
     set_win_asc_win_desc_to_bbox(font)
 
     # txt file generation

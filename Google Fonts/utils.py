@@ -64,6 +64,7 @@ def download_gf_family(name):
     if remote_fonts:
         family_zip = ZipFile(StringIO(remote_fonts.read()))
         return fonts_from_zip(family_zip)
+    return None
 
 
 class RepoDoc:

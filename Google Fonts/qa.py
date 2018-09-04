@@ -691,18 +691,16 @@ class TestVerticalMetrics(TestGlyphsFiles):
             for master in font.masters:
                 win_ascent = master.customParameters['winAscent']
                 win_descent = master.customParameters['winDescent']
-                self.assertEqual(
-                    int(win_ascent),
-                    ymax,
+                self.assertTrue(
+                    int(win_ascent) >= ymax,
                     ("%s master's winAscent %s is not equal to yMax %s") % (
                         master.name,
                         win_ascent,
                         ymax)
                 )
                 # ymin is abs because win descent is a positive integer
-                self.assertEqual(
-                    int(win_descent),
-                    abs(ymin),
+                self.assertTrue(
+                    int(win_descent) >= abs(ymin),
                     ("%s master's winDescent %s is not equal to yMin %s") % (
                         master.name,
                         win_descent,

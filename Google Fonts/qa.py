@@ -268,17 +268,19 @@ class TestFontInfo(TestGlyphsFiles):
 
         Single weight families which visually look heavy are not exempt
         from this rule."""
+        styles = []
         for font in self.fonts:
-            instances = font.instances
-            if len(instances) == 1:
-                instance = instances[0]
-                self.assertEqual(
-                    instance.name,
-                    'Regular',
-                    ("'%s' instance name is incorrect.\n\n"
-                     "Families which have just one instance must "
-                     "name the single 'Regular'") % instance.name
-                )
+            for instance in font.instances:
+                styles.append(instance.name)
+
+        if len(styles) == 1:
+            self.assertEqual(
+                styles[0],
+                'Regular',
+                ("'%s' instance name is incorrect.\n\n"
+                 "Families which have just one instance must "
+                 "name the instance 'Regular'") % styles[0]
+            )
 
     def test_italic_instances_have_isItalic_set(self):
         """Check only italic instances have 'isItalic' set"""

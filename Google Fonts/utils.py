@@ -16,7 +16,7 @@ def ttf_family_style_name(ttfont):
         ps_name = ps_name.split('-')
     except: # else use win ps name
         ps_name = ttfont['name'].getName(6, 3, 1, 1033).string
-        ps_name = psn_name.decode('utf_16_be').split('-')
+        ps_name = ps_name.decode('utf_16_be').split('-')
     try:
         family, style = ps_name
         return family, style

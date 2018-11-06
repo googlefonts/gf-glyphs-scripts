@@ -55,7 +55,7 @@ def fonts_from_zip(zipfile):
     ttfs = []
     for file_name in zipfile.namelist():
         if 'ttf' in file_name:
-            ttfs.append(TTFont(zipfile.open(file_name)))
+            ttfs.append(TTFont(StringIO(zipfile.read(file_name))))
     return ttfs
 
 

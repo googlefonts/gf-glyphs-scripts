@@ -1,5 +1,6 @@
 from fontTools.ttLib import TTFont
 from StringIO import StringIO
+from io import BytesIO
 from zipfile import ZipFile
 from urllib import urlopen
 import csv
@@ -55,14 +56,14 @@ def fonts_from_zip(zipfile):
     ttfs = []
     for file_name in zipfile.namelist():
         if 'ttf' in file_name:
-            ttfs.append(TTFont(StringIO(zipfile.read(file_name))))
+            ttfs.append(TTFont(BytesIO(zipfile.read(file_name))))
     return ttfs
 
 
 def download_gf_family(name):
     remote_fonts = url_200_response(name)
     if remote_fonts:
-        family_zip = ZipFile(StringIO(remote_fonts.read()))
+        family_zip = ZipFile(BytesIO(remote_fonts.read()))
         return fonts_from_zip(family_zip)
     return None
 

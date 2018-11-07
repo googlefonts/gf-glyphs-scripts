@@ -106,14 +106,13 @@ def visual_inherit_vertical_metrics(font, ttfs_gf):
         ttf_gf_upm = ttf_gf['head'].unitsPerEm
 
         if master_use_typo_metrics and ttf_gf_use_typo_metrics:
-
             master.customParameters['typoAscender'] = norm_m(ttf_gf['OS/2'].sTypoAscender, ttf_gf_upm, master_upm)
             master.customParameters['typoDescender'] = norm_m(ttf_gf['OS/2'].sTypoDescender, ttf_gf_upm, master_upm)
             master.customParameters['typoLineGap'] = norm_m(ttf_gf['OS/2'].sTypoLineGap, ttf_gf_upm, master_upm)
 
         elif master_use_typo_metrics and not ttf_gf_use_typo_metrics:
             master.customParameters['typoAscender'] = norm_m(ttf_gf['OS/2'].usWinAscent, ttf_gf_upm, master_upm)
-            master.customParameters['typoDescender'] = norm_m(ttf_gf['OS/2'].usWinDescent, ttf_gf_upm, master_upm)
+            master.customParameters['typoDescender'] = -abs(norm_m(ttf_gf['OS/2'].usWinDescent, ttf_gf_upm, master_upm))
             master.customParameters['typoLineGap'] = 0
 
         master.customParameters['hheaAscender'] = norm_m(ttf_gf['hhea'].ascent, ttf_gf_upm, master_upm)

@@ -13,29 +13,42 @@ def checkActualComponents(components ,glyph, glyphNames):
 	baseAnchors = {}
 	attachAnchors = {}
 	conflictingAnchors = []
+	conflictingComponents = []
+
 	for i in range(len(actualComponents) - 1):
 		for anchor in font.glyphs[components[i]].layers[0].anchors:
-			if re.match('^_.*', anchor.name) == None:
-				baseAnchors.update({anchor.name : components[i]})
+			baseAnchors.update({anchor.name : components[i]})
 				
 		for anchor in font.glyphs[components[i + 1]].layers[0].anchors:
 			if re.match('^_.*', anchor.name) != None:
 				attachAnchors.update({anchor.name : components[i + 1]})
+
+	# for i in range(len(actualComponents)):
+	# 	for anchor in font.glyphs[components[i]].layers[0].anchors:
+	# 		if re.match('^_.*', anchor.name) == None:
+	# 			baseAnchors.update({anchor.name : components[i]})
+	# 		else:
+	# 			attachAnchors.update({anchor.name : components[i]})
 				
-	count = 0
+	counts = {}
+	for component in components:
+		counts.update({component : 0})
+		
 	for item in attachAnchors.keys():
 		if baseAnchors.get(re.sub('^_', '', item)) != None:
-			count = count + 1
+			counts.update({attachAnchors[item] : counts[attachAnchors[item]] + 1})
 			conflictingAnchors.append(str(re.sub('^_', '', item)))
-			addGlyph = True
+			conflictingComponents.append(attachAnchors[item])
 		else:
 			pass
 	
-	if count > 1:
-		glyphNames = glyphNames + "/" + glyph.name
-		print "%s has %d conflicting anchors:" % (glyph.name, count)
-		print "%s" % re.sub('\[', '', re.sub('\]', '', str(conflictingAnchors)))
-		print "\n"
+	for count in counts.keys():
+		if counts[count] > 1:
+			glyphNames = glyphNames + "/" + glyph.name
+			print "%s has %d conflicting anchors:" % (glyph.name, counts[count])
+			for i in range(len(conflictingAnchors)):
+				print "%s in %s" % (conflictingAnchors[i], conflictingComponents[i])
+			print "\n"
 	
 	return glyphNames
 				

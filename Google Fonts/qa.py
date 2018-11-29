@@ -368,8 +368,8 @@ class TestFontInfo(TestGlyphsFiles):
             for instance in instances:
                 if 'Italic' not in instance.name:
                     self.assertEqual(
-                        '',
-                        instance.linkStyle,
+                        0,
+                        len(instance.linkStyle),
                         ("%s instance must have no style linking."
                          " Delete link to %s") % (
                             instance.name,

@@ -151,7 +151,8 @@ class TestGlyphsFiles(unittest.TestCase):
         """Return the generated .ttfs from the open .glyphs files"""
         if not self._ttfs:
             for font in self.fonts:
-                for instance in font.instances:
+                instances = [i for i in font.instances if i.visible() == 1]
+                for instance in instances:
                     instance.generate(Format='ttf', FontPath=self._temp_dir)
         self._ttfs = [TTFont(os.path.join(self._temp_dir, f)) for f
                       in os.listdir(self._temp_dir) if f.endswith('.ttf')]
@@ -209,7 +210,7 @@ class TestFontInfo(TestGlyphsFiles):
     def test_style_names(self):
         """Check instances have the correct name for the GF API"""
         for font in self.fonts:
-            instances = font.instances
+            instances = [i for i in font.instances if i.visible() == 1]
             family_styles = set([i.name for i in instances])
             for style in family_styles:
                 self.assertIn(
@@ -270,7 +271,8 @@ class TestFontInfo(TestGlyphsFiles):
         from this rule."""
         styles = []
         for font in self.fonts:
-            for instance in font.instances:
+            instances = [i for i in font.instances if i.visible() == 1]
+            for instance in instances:
                 styles.append(instance.name)
 
         if len(styles) == 1:
@@ -285,7 +287,7 @@ class TestFontInfo(TestGlyphsFiles):
     def test_italic_instances_have_isItalic_set(self):
         """Check only italic instances have 'isItalic' set"""
         for font in self.fonts:
-            instances = font.instances
+            instances = [i for i in font.instances if i.visible() == 1]
             for instance in instances:
                 if 'Italic' in instance.name:
                     self.assertEqual(
@@ -309,7 +311,7 @@ class TestFontInfo(TestGlyphsFiles):
     def test_instances_have_isBold_set(self):
         """Check only Bold and Bold Italic have 'isBold' set"""
         for font in self.fonts:
-            instances = font.instances
+            instances = [i for i in font.instances if i.visible() == 1]
             for instance in instances:
                 if instance.name == 'Bold' or instance.name == 'Bold Italic':
                     self.assertEqual(
@@ -335,7 +337,7 @@ class TestFontInfo(TestGlyphsFiles):
     def test_stylelinking_is_consistent_for_all_italic_instances(self):
         """Check style linking is correct for italic instances"""
         for font in self.fonts:
-            instances = font.instances
+            instances = [i for i in font.instances if i.visible() == 1]
             for instance in instances:
                 if 'Italic' in instance.name:
                     if instance.name == 'Italic' or instance.name == 'Bold Italic':
@@ -362,12 +364,12 @@ class TestFontInfo(TestGlyphsFiles):
     def test_stylelinking_is_consistent_for_all_non_italic_instances(self):
         """Check style linking is correct for non italic instances"""
         for font in self.fonts:
-            instances = font.instances
+            instances = [i for i in font.instances if i.visible() == 1]
             for instance in instances:
                 if 'Italic' not in instance.name:
                     self.assertEqual(
-                        '',
-                        instance.linkStyle,
+                        0,
+                        len(instance.linkStyle),
                         ("%s instance must have no style linking."
                          " Delete link to %s") % (
                             instance.name,

@@ -6,8 +6,6 @@ def find_transformed_component_glyphs(font):
 	for idx, master in enumerate(font.masters):
 		for glyph in font.glyphs:
 			components = glyph.layers[idx].components
-			if len(components) >= 2:
-				continue
 			for comp in components:
 				if sum(comp.scale) != 2.0:
 					found.add(glyph.name)

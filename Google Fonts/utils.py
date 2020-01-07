@@ -5,6 +5,7 @@ from zipfile import ZipFile
 from urllib import urlopen
 import csv
 from math import ceil
+import re
 
 API_URL_PREFIX = 'https://fonts.google.com/download?family='
 UPSTREAM_REPO_DOC = 'http://tinyurl.com/kflp3k7'

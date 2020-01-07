@@ -9,7 +9,8 @@ from utils import (
     ttf_family_style_name,
     RepoDoc,
     UPSTREAM_REPO_DOC,
-    norm_m
+    norm_m,
+    convert_camelcase
 )
 from datetime import datetime
 from vertmetrics import shortest_tallest_glyphs
@@ -223,7 +224,7 @@ def main():
             if instance.width == 'Semi Expanded':
                 family_suffix = instance.width
             else:
-                family_suffix = _convert_camelcase(instance.width)
+                family_suffix = convert_camelcase(instance.width)
             sub_family_name = '%s %s' % (font.familyName, family_suffix)
             instance.customParameters['familyName'] = sub_family_name
 

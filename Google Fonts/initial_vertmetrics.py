@@ -1,4 +1,5 @@
 #MenuTitle: Initial setting of vertical metrics
+# -*- coding: utf-8 -*-
 '''
 
 Calculates vertical metrics according to https://github.com/googlefonts/fontbakery/issues/2164#issuecomment-436595886, sets them in all masters, deletes them in all instances.

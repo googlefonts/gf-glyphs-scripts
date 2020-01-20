@@ -20,6 +20,8 @@ def main():
 	if not bad_components:
 		print "Skipping. No transformed components"
 		return
+	tabString = "/"+"/".join(bad_components)
+	font.newTab(tabString)
 	
 	for idx, master in enumerate(font.masters):
 		for name in bad_components:
@@ -27,7 +29,7 @@ def main():
 				name, master.name
 			)
 			font.glyphs[name].layers[idx].decomposeComponents()
-
+			font.glyphs[name].layers[idx].correctPathDirection()
 		
 if __name__ == "__main__":
 	main()

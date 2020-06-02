@@ -2,7 +2,7 @@
 
 
 ## qa.py
-Check a font family conforms to the Google Fonts' [specification](https://github.com/googlefonts/gf-docs/blob/master/ProjectChecklist.md)
+Check a font family conforms to the Google Fonts' [specification](https://github.com/googlefonts/gf-docs/tree/master/ProjectChecklist)
 
 
 ## Installation

@@ -1,8 +1,8 @@
 #MenuTitle: QA
 # -*- coding: utf-8 -*-
 """
-Check GF upstream repositories pass GF checklist,
-https://github.com/googlefonts/gf-docs/blob/master/ProjectChecklist.md
+Check GF upstream repositories pass GF spec,
+https://github.com/googlefonts/gf-docs/tree/master/Spec
 """
 import unittest
 from unittest import TestProgram
@@ -164,7 +164,7 @@ class TestFontInfo(TestGlyphsFiles):
     def test_copyright(self):
         """Check copyright string is correct
 
-        https://github.com/googlefonts/gf-docs/blob/master/ProjectChecklist.md#ofltxt
+        https://github.com/googlefonts/gf-docs/tree/master/Spec#font-copyright
 
         The string must include the git repo url.
         """

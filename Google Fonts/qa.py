@@ -1,8 +1,8 @@
 #MenuTitle: QA
 # -*- coding: utf-8 -*-
 """
-Check GF upstream repositories pass GF checklist,
-https://github.com/googlefonts/gf-docs/blob/master/ProjectChecklist.md
+Check GF upstream repositories pass GF spec,
+https://github.com/googlefonts/gf-docs/tree/master/Spec
 """
 import unittest
 from unittest import TestProgram
@@ -44,10 +44,10 @@ FONT_ATTRIBS = [
 LICENSE = '%s%s%s' % (
     'This Font Software is licensed under the SIL Open Font License, ',
     'Version 1.1. This license is available with a FAQ at: ',
-    'http://scripts.sil.org/OFL'
+    'https://scripts.sil.org/OFL'
 )
 
-LICENSE_URL = 'http://scripts.sil.org/OFL'
+LICENSE_URL = 'https://scripts.sil.org/OFL'
 
 SOURCES_FOLDER = 'sources'
 FONTS_FOLDER = 'fonts'
@@ -164,11 +164,11 @@ class TestFontInfo(TestGlyphsFiles):
     def test_copyright(self):
         """Check copyright string is correct
 
-        https://github.com/googlefonts/gf-docs/blob/master/ProjectChecklist.md#ofltxt
+        https://github.com/googlefonts/gf-docs/tree/master/Spec#font-copyright
 
         The string must include the git repo url.
         """
-        
+
         repo_git_url = None
         for font in self.fonts:
             if not repo_git_url:
@@ -179,7 +179,7 @@ class TestFontInfo(TestGlyphsFiles):
             )
 
             copyright_search = re.search(family_copyright_pattern, font.copyright)
-            
+
             self.assertIsNotNone(
                 repo_git_url,
                 ('Copyright does not contain git url.\n\n'
@@ -373,7 +373,7 @@ class TestFontInfo(TestGlyphsFiles):
                         ("%s instance must have no style linking."
                          " Delete link to %s") % (
                             instance.name,
-                            instance.linkStyle 
+                            instance.linkStyle
                         )
                     )
 
@@ -504,7 +504,7 @@ class TestRegressions(TestGlyphsFiles):
         we can use this to our advantage. By setting this bit, the typo
         metrics are used instead of the win metrics. This allows us to
         add taller scripts, without affecting the line leading. The win
-        metrics can then be set freely. This scenario is common when 
+        metrics can then be set freely. This scenario is common when
         upgrading legacy families.
 
         If both the hosted family and the local family have fsSelection
@@ -530,7 +530,7 @@ class TestRegressions(TestGlyphsFiles):
 
                 if r_use_typo_metrics and l_use_typo_metrics:
                     self.assertEqual(
-                        l_font['OS/2'].sTypoAscender, 
+                        l_font['OS/2'].sTypoAscender,
                         norm_m(r_font['OS/2'].sTypoAscender, r_upm, l_upm),
                         "Local %s typoAscender %s is not equal to remote %s typoAscender %s" % (
                             style,
@@ -539,7 +539,7 @@ class TestRegressions(TestGlyphsFiles):
                         )
                     )
                     self.assertEqual(
-                        l_font['OS/2'].sTypoDescender, 
+                        l_font['OS/2'].sTypoDescender,
                         norm_m(r_font['OS/2'].sTypoDescender, r_upm, l_upm),
                         "Local %s typoDescender %s is not equal to remote %s typoDescender %s" % (
                             style,
@@ -548,7 +548,7 @@ class TestRegressions(TestGlyphsFiles):
                         )
                     )
                     self.assertEqual(
-                        l_font['OS/2'].sTypoLineGap, 
+                        l_font['OS/2'].sTypoLineGap,
                         norm_m(r_font['OS/2'].sTypoLineGap, r_upm, l_upm),
                         "Local %s typoLineGap %s is not equal to remote %s typoLineGap %s" % (
                             style,
@@ -588,17 +588,17 @@ class TestRegressions(TestGlyphsFiles):
                     )
 
                 self.assertEqual(
-                    l_font['hhea'].ascent, 
+                    l_font['hhea'].ascent,
                     norm_m(r_font['hhea'].ascent, r_upm, l_upm),
                     "Local %s hheaAscender %s is not equal to remote %s hheaAscender %s" % (
                         style,
-                        l_font['hhea'].ascent, 
+                        l_font['hhea'].ascent,
                         style,
                         norm_m(r_font['hhea'].ascent, r_upm, l_upm),
                     )
                 )
                 self.assertEqual(
-                    l_font['hhea'].descent, 
+                    l_font['hhea'].descent,
                     norm_m(r_font['hhea'].descent, r_upm, l_upm),
                     "Local %s hheaDescender %s is not equal to remote %s hheaDescender %s" % (
                         style,
@@ -620,7 +620,7 @@ class TestRegressions(TestGlyphsFiles):
 
 
 class TestVerticalMetrics(TestGlyphsFiles):
-    
+
     def test_family_has_vertical_metric_parameters(self):
         """Check family has vertical metric custom parameters
 
@@ -739,7 +739,7 @@ class TestRepositoryStructure(TestGlyphsFiles):
                 found = True
             self.assertEqual(
                 True,
-                found, 
+                found,
                 ("Family is not listed in the GF Master repo doc, %s.\n\n"
                  "Listing the family helps us keep track of it and ensure "
                  "there is one original source") % UPSTREAM_REPO_DOC

@@ -93,8 +93,8 @@ STYLE_NAMES = [
 ]
 
 STYLE_WEIGHTS = {
-    'Thin': 250,
-    'ExtraLight': 275,
+    'Thin': 100,
+    'ExtraLight': 200,
     'Light': 300,
     'Regular': 400,
     'Medium': 500,

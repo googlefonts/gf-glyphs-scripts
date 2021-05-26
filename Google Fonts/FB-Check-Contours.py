@@ -14,7 +14,7 @@ font.newTab().layers = []
 
 def checkCounters(glyph, contours):
 	for layer in glyph.layers:
-		if layer.layerId == layer.associatedMasterId or re.match("\[\d*[\[, \]]", layer.name) != None or re.match("\{\d*[\{, \}]", layer.name) != None:
+		if layer.layerId == layer.associatedMasterId or re.match("\[\d*[\[, \]]", layer.name) is not None or re.match("\{\d*[\{, \}]", layer.name) is not None:
 			tempLayer = layer.copyDecomposedLayer()
 			tempLayer.removeOverlap()
 			count = len(tempLayer.paths)
@@ -27,9 +27,9 @@ def checkCounters(glyph, contours):
 	
 
 for data in desired_glyph_data:
-	if font.glyphs[data["name"]] != None and font.glyphs[data["name"]].export == True:
+	if font.glyphs[data["name"]] is not None and font.glyphs[data["name"]].export == True:
 		checkCounters(font.glyphs[data["name"]], data["contours"])
-	elif font.glyphs[Glyphs.glyphInfoForUnicode(data["unicode"]).name] != None and font.glyphs[Glyphs.glyphInfoForUnicode(data["unicode"]).name].export == True:
+	elif font.glyphs[Glyphs.glyphInfoForUnicode(data["unicode"]).name] is not None and font.glyphs[Glyphs.glyphInfoForUnicode(data["unicode"]).name].export == True:
 		checkCounters(font.glyphs[Glyphs.glyphInfoForUnicode(data["unicode"]).name], data["contours"])
 	else:
 		pass

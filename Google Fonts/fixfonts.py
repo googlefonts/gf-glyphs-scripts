@@ -233,10 +233,6 @@ def main():
         else:
             instance.isBold = False
 
-        # Change ExtraLight weight class from 250 to 275
-        if instance.weight == 'ExtraLight':
-            instance.customParameters['weightClass'] = 275
-
         # If Heavy exists, create a new font family for it
         if 'Heavy' in instance.name:
             instance.customParameters['familyName'] = '%s Heavy' % (font.familyName)

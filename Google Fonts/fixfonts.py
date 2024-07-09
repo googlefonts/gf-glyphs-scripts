@@ -15,6 +15,8 @@ from utils import (
 from datetime import datetime
 from vertmetrics import shortest_tallest_glyphs
 import templates
+from io import StringIO
+
 
 BAD_PARAMETERS = [
     'openTypeNameLicense',
@@ -47,9 +49,9 @@ def gen_copyright_string(font):
     repo_doc = RepoDoc()
     git_url = repo_doc.family_url(font.familyName)
     if not git_url:
-        print ('WARNING: Cannot auto gen copyright string. Git url not listed in '
+        print('WARNING: Cannot auto gen copyright string. Git url not listed in '
                'Repo Doc, %s. If family was recently added, it may take a while '
-               'for the GF sheet API to update it.') % UPSTREAM_REPO_DOC
+               'for the GF sheet API to update it.' % UPSTREAM_REPO_DOC)
         return
 
     if not current_rfn:
@@ -150,13 +152,13 @@ def main():
         if not font.manufacturerURL.startswith(('http://', 'https://')):
             font.manufacturerURL = 'http://' + font.manufacturerURL
     else:
-        print 'WARNING: manufacturerURL is missing'
+        print('WARNING: manufacturerURL is missing')
 
     if font.designerURL:
         if not font.designerURL.startswith(('http://', 'https://')):
             font.designerURL = 'http://' + font.designerURL
     else:
-        print 'WARNING: designerURL is missing'
+        print('WARNING: designerURL is missing')
 
     # Remove glyph order
     if 'glyphOrder' in font.customParameters:
@@ -173,7 +175,7 @@ def main():
     if not font.glyphs['nbspace']:
         nbspace = GSGlyph()
         nbspace.name = 'nbspace'
-        nbspace.unicode = unicode('00A0')
+        nbspace.unicode = "00A0"
         font.glyphs.append(nbspace)
 
     # if uni000D rename it
@@ -196,8 +198,8 @@ def main():
         null.name = 'NULL'
         font.glyphs.append(null)
 
-    font.glyphs['CR'].unicode = unicode('000D')
-    font.glyphs['NULL'].unicode = unicode('0000')
+    font.glyphs['CR'].unicode = "000D"
+    font.glyphs['NULL'].unicode = "0000"
 
     # fix width glyphs
     for i, master in enumerate(masters):
@@ -247,9 +249,12 @@ def main():
             instance.name = 'Italic'
 
     # Regressions fixing
-    ttfs_gf = download_gf_family(font.familyName)
-    if ttfs_gf:
-        visual_inherit_vertical_metrics(font, ttfs_gf)
+    try:
+        ttfs_gf = download_gf_family(font.familyName)
+        if ttfs_gf:
+            visual_inherit_vertical_metrics(font, ttfs_gf)
+    except:
+        all
     set_win_asc_win_desc_to_bbox(font)
 
     # txt file generation
@@ -263,5 +268,5 @@ if __name__ == '__main__':
         os.path.join(os.path.dirname(__glyphsfile), '..')
     )
     main()
-    print 'Fonts updated to GF spec'
+    print('Fonts updated to GF spec')
 

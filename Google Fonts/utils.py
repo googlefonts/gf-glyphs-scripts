@@ -1,8 +1,7 @@
 from fontTools.ttLib import TTFont
-from StringIO import StringIO
-from io import BytesIO
+from io import BytesIO, StringIO
 from zipfile import ZipFile
-from urllib import urlopen
+from urllib.request import urlopen
 import csv
 from math import ceil
 import re
@@ -44,11 +43,10 @@ def _font_family_url(family_name):
 
 def url_200_response(family_name):
     """Return a zipfile containing a font family hosted on fonts.google.com"""
-    family_url = _font_family_url(family_name)
-    request = urlopen(family_url)
-    if request.getcode() == 200:
-        return request
-    else:
+    try:
+        family_url = _font_family_url(family_name)
+        return urlopen(family_url)
+    except:
         return False
 
 
@@ -62,17 +60,19 @@ def fonts_from_zip(zipfile):
 
 
 def download_gf_family(name):
-    remote_fonts = url_200_response(name)
-    if remote_fonts:
-        family_zip = ZipFile(BytesIO(remote_fonts.read()))
-        return fonts_from_zip(family_zip)
-    return None
+    try:
+        remote_fonts = url_200_response(name)
+        if remote_fonts:
+            family_zip = ZipFile(BytesIO(remote_fonts.read()))
+            return fonts_from_zip(family_zip)
+    except:
+        return None
 
 
 class RepoDoc:
     """return the Google Repo doc which contains all repo urls"""
     handle = urlopen(UPSTREAM_REPO_URLS)
-    ss = StringIO(handle.read())
+    ss = StringIO(handle.read().decode("utf-8"))
     _doc = list(csv.DictReader(ss))
 
     @property

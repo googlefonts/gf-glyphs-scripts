@@ -20,11 +20,11 @@ for glyph in font.glyphs:
 			layerAnchors = {}
 			for anchor in layer.anchors:
 				layerAnchors.update({anchor.name : anchor.name})
-				if baseAnchors.get(anchor.name, None) == None:
+				if baseAnchors.get(anchor.name, None) is None:
 					addLayer = True
 					print "%s has extra anchor \'%s\' on %s layer" % (glyph.name, anchor.name, layer.name)
 			for anchorName in baseAnchors.keys():
-				if layerAnchors.get(anchorName, None) == None:
+				if layerAnchors.get(anchorName, None) is None:
 					addLayer = True
 					print "%s is missing anchor \'%s\' on %s layer" % (glyph.name, anchorName, layer.name)
 				

@@ -20,7 +20,7 @@ def checkActualComponents(components ,glyph, glyphNames):
 			baseAnchors.update({anchor.name : components[i]})
 				
 		for anchor in font.glyphs[components[i + 1]].layers[0].anchors:
-			if re.match('^_.*', anchor.name) != None:
+			if re.match('^_.*', anchor.name) is not None:
 				attachAnchors.update({anchor.name : components[i + 1]})
 
 	# for i in range(len(actualComponents)):
@@ -35,7 +35,7 @@ def checkActualComponents(components ,glyph, glyphNames):
 		counts.update({component : 0})
 		
 	for item in attachAnchors.keys():
-		if baseAnchors.get(re.sub('^_', '', item)) != None:
+		if baseAnchors.get(re.sub('^_', '', item)) is not None:
 			counts.update({attachAnchors[item] : counts[attachAnchors[item]] + 1})
 			conflictingAnchors.append(str(re.sub('^_', '', item)))
 			conflictingComponents.append(attachAnchors[item])

@@ -10,8 +10,6 @@ from runner import GlyphsTestRunner
 import os
 from ntpath import basename
 from fontTools.ttLib import TTFont
-import csv
-from StringIO import StringIO
 from zipfile import ZipFile
 import re
 from datetime import datetime
@@ -20,7 +18,7 @@ import tempfile
 from math import ceil
 
 from vertmetrics import VERT_KEYS, shortest_tallest_glyphs
-from utils import (
+from gf_utils import (
     download_gf_family,
     UPSTREAM_REPO_URLS,
     UPSTREAM_REPO_DOC,
@@ -93,8 +91,8 @@ STYLE_NAMES = [
 ]
 
 STYLE_WEIGHTS = {
-    'Thin': 250,
-    'ExtraLight': 275,
+    'Thin': 100,
+    'ExtraLight': 200,
     'Light': 300,
     'Regular': 400,
     'Medium': 500,
@@ -102,8 +100,8 @@ STYLE_WEIGHTS = {
     'Bold': 700,
     'ExtraBold': 800,
     'Black': 900,
-    'Thin Italic': 250,
-    'ExtraLight Italic': 275,
+    'Thin Italic': 100,
+    'ExtraLight Italic': 200,
     'Light Italic': 300,
     'Italic': 400,
     'Medium Italic': 500,
@@ -256,7 +254,7 @@ class TestFontInfo(TestGlyphsFiles):
                         )
                     )
                 except KeyError:
-                    print '%s is not a correct style name' % instance.name
+                    print('%s is not a correct style name' % instance.name)
 
     def test_single_instance_family_is_regular(self):
         """Check single weight families have Regular style name
@@ -432,8 +430,7 @@ class TestRegressions(TestGlyphsFiles):
         styles = []
         for font in fonts:
             name = font['name'].getName(2, 3, 1, 1033)
-            enc = name.getEncoding()
-            styles.append(str(name).decode(enc))
+            styles.append(name.toUnicode())
         return set(styles)
 
     def _hash_fonts(self, ttfs):
@@ -816,4 +813,4 @@ if __name__ == '__main__':
     if len(set([f.familyName for f in Glyphs.fonts])) == 1:
         TestProgram(argv=['--verbose'], exit=False, testRunner=GlyphsTestRunner)
     else:
-        print 'Multiple Families open! Please only have one family open'
+        print('Multiple Families open! Please only have one family open')

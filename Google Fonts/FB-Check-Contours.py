@@ -23,7 +23,7 @@ def checkCounters(glyph, contours):
 				pass
 			else:
 				font.tabs[-1].layers.append(layer)
-				print glyph.name, "Expected Contours: %s" % str(contours), "Current Contours: %d" % count
+				print(glyph.name, "Expected Contours: %s" % str(contours), "Current Contours: %d" % count)
 	
 
 for data in desired_glyph_data:

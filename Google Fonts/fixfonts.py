@@ -4,13 +4,12 @@ Fix/add requirements from ProjectChecklist.md
 '''
 import os
 import re
-from utils import (
+from gf_utils import (
     download_gf_family,
     ttf_family_style_name,
     RepoDoc,
     UPSTREAM_REPO_DOC,
     norm_m,
-    convert_camelcase
 )
 from datetime import datetime
 from vertmetrics import shortest_tallest_glyphs
@@ -28,6 +27,20 @@ BAD_PARAMETERS = [
     'Family Alignment Zones',
 ]
 
+# OS/2 usWidthClass integer -> human-readable family-name suffix.
+# Class 5 (Medium / normal) is intentionally absent: those instances stay in
+# the base family.
+WIDTH_CLASS_NAMES = {
+    1: 'Ultra Condensed',
+    2: 'Extra Condensed',
+    3: 'Condensed',
+    4: 'Semi Condensed',
+    6: 'Semi Expanded',
+    7: 'Expanded',
+    8: 'Extra Expanded',
+    9: 'Ultra Expanded',
+}
+
 def style_from_ttf(ttf):
     family, style = ttf_family_style_name(ttf)
     return style
@@ -37,6 +50,19 @@ def gen_copyright_string(font):
     """Automatically Generate the family's copyright string, using the
     GF Repo doc, http://tinyurl.com/kd9lort"""
     current_copyright = font.copyright
+
+    # Google Fonts no longer accepts new families with a Reserved Font Name.
+    # Removing an RFN is the original author's call (it's a licensing decision),
+    # so warn and leave the existing copyright untouched rather than silently
+    # rewriting it.
+    current_rfn = re.search(r'(?<=Reserved Font Name \").*(?=\")', current_copyright)
+    if current_rfn:
+        print('WARNING: Font contains a Reserved Font Name ("%s"). Google Fonts '
+              'no longer accepts new families with RFNs. Copyright string left '
+              'as-is; please remove the RFN before submitting.'
+              % current_rfn.group(0))
+        return
+
     year = re.search(r'[0-9]{4}', current_copyright)
     if year:
         year = year.group(0)
@@ -44,7 +70,6 @@ def gen_copyright_string(font):
         year = datetime.now().year
 
     project_name = font.familyName
-    current_rfn = re.search(r'(?<=Reserved Font Name \").*(?=\")', current_copyright)
 
     repo_doc = RepoDoc()
     git_url = repo_doc.family_url(font.familyName)
@@ -54,21 +79,11 @@ def gen_copyright_string(font):
                'for the GF sheet API to update it.' % UPSTREAM_REPO_DOC)
         return
 
-    if not current_rfn:
-        new_copyright = 'Copyright %s The %s Project Authors (%s)' % (
-            year,
-            project_name,
-            git_url
-        )
-    else:
-        new_copyright = ('Copyright %s The %s Project Authors (%s), '
-                         'with Reserved Font Name "(%s)".') % (
-            year,
-            project_name,
-            git_url,
-            current_rfn.group(0)
-        )
-    font.copyright = new_copyright
+    font.copyright = 'Copyright %s The %s Project Authors (%s)' % (
+        year,
+        project_name,
+        git_url,
+    )
 
 
 def gen_ofl(copyright_string):
@@ -136,8 +151,8 @@ def main():
 
     font = Glyphs.font
     gen_copyright_string(font)
-    font.customParameters['license'] = 'This Font Software is licensed under the SIL Open Font License, Version 1.1. This license is available with a FAQ at: http://scripts.sil.org/OFL'
-    font.customParameters['licenseURL'] = 'http://scripts.sil.org/OFL'
+    font.customParameters['license'] = 'This Font Software is licensed under the SIL Open Font License, Version 1.1. This license is available with a FAQ at: https://scripts.sil.org/OFL'
+    font.customParameters['licenseURL'] = 'https://scripts.sil.org/OFL'
     font.customParameters['fsType'] = []
     font.customParameters['Use Typo Metrics'] = True
     font.customParameters['Disable Last Change'] = True
@@ -147,16 +162,16 @@ def main():
     for key in BAD_PARAMETERS:
         del font.customParameters[key]
 
-    # Add http:// to manufacturerURL and designerURL if they don't exist
+    # Add https:// to manufacturerURL and designerURL if they don't exist
     if font.manufacturerURL:
         if not font.manufacturerURL.startswith(('http://', 'https://')):
-            font.manufacturerURL = 'http://' + font.manufacturerURL
+            font.manufacturerURL = 'https://' + font.manufacturerURL
     else:
         print('WARNING: manufacturerURL is missing')
 
     if font.designerURL:
         if not font.designerURL.startswith(('http://', 'https://')):
-            font.designerURL = 'http://' + font.designerURL
+            font.designerURL = 'https://' + font.designerURL
     else:
         print('WARNING: designerURL is missing')
 
@@ -212,49 +227,47 @@ def main():
 
     # fix instance names to pass gf spec
     for i, instance in enumerate(instances):
+        # Glyphs 3 dropped instance.weight (string). Derive the weight token
+        # from instance.name: e.g. "Bold Italic" -> "Bold", "Italic" -> "Regular".
+        weight_name = instance.name.replace(' Italic', '').replace('Italic', '').strip() or 'Regular'
+
         if 'Italic' in instance.name:
             instance.isItalic = True
-            if instance.weight != 'Bold' and instance.weight != 'Regular':
-                instance.linkStyle = instance.weight
-            else:
+            if weight_name in ('Bold', 'Regular'):
                 instance.linkStyle = ''
+            else:
+                instance.linkStyle = weight_name
         else:
             instance.linkStyle = ''
 
-        # Seperate non Reg/Medium weights into their own family
-        if instance.width != 'Medium (normal)':
-            if instance.width == 'Semi Expanded':
-                family_suffix = instance.width
-            else:
-                family_suffix = convert_camelcase(instance.width)
-            sub_family_name = '%s %s' % (font.familyName, family_suffix)
-            instance.customParameters['familyName'] = sub_family_name
+        # Separate non-Medium widths into their own family
+        width_suffix = WIDTH_CLASS_NAMES.get(instance.widthClass)
+        if width_suffix:
+            instance.customParameters['familyName'] = '%s %s' % (font.familyName, width_suffix)
 
-        if instance.weight == 'Bold':
+        if weight_name == 'Bold':
             instance.isBold = True
         else:
             instance.isBold = False
 
-        # Change ExtraLight weight class from 250 to 275
-        if instance.weight == 'ExtraLight':
-            instance.customParameters['weightClass'] = 275
+        if weight_name == 'Thin':
+            instance.weightClass = 100
+        if weight_name == 'ExtraLight':
+            instance.weightClass = 200
 
         # If Heavy exists, create a new font family for it
         if 'Heavy' in instance.name:
             instance.customParameters['familyName'] = '%s Heavy' % (font.familyName)
             instance.name = instance.name.replace('Heavy', 'Regular')
-            instance.weight = 'Regular'
+            instance.weightClass = 400
 
         if instance.name == 'Regular Italic':
             instance.name = 'Italic'
 
     # Regressions fixing
-    try:
-        ttfs_gf = download_gf_family(font.familyName)
-        if ttfs_gf:
-            visual_inherit_vertical_metrics(font, ttfs_gf)
-    except:
-        all
+    ttfs_gf = download_gf_family(font.familyName)
+    if ttfs_gf:
+        visual_inherit_vertical_metrics(font, ttfs_gf)
     set_win_asc_win_desc_to_bbox(font)
 
     # txt file generation

@@ -24,7 +24,7 @@ def get_kern_strings(font):
 	kern_strings = []
 	
 	ids_to_names = _glyph_ids_to_glyph_names(font)
-        master = font.selectedFontMaster.id
+	master = font.selectedFontMaster.id
 	for left_key in font.kerning[master]:
 		for right_key in font.kerning[master][left_key]:
 			left = left_key.split('_')[-1] if '_' in left_key \

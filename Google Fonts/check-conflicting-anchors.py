@@ -45,10 +45,10 @@ def checkActualComponents(components ,glyph, glyphNames):
 	for count in counts.keys():
 		if counts[count] > 1:
 			glyphNames = glyphNames + "/" + glyph.name
-			print "%s has %d conflicting anchors:" % (glyph.name, counts[count])
+			print("%s has %d conflicting anchors:" % (glyph.name, counts[count]))
 			for i in range(len(conflictingAnchors)):
-				print "%s in %s" % (conflictingAnchors[i], conflictingComponents[i])
-			print "\n"
+				print("%s in %s" % (conflictingAnchors[i], conflictingComponents[i]))
+			print("\n")
 	
 	return glyphNames
 				

@@ -18,14 +18,14 @@ def main():
 	font = Glyphs.font
 	bad_components = find_transformed_component_glyphs(font)
 	if not bad_components:
-		print "Skipping. No transformed components"
+		print("Skipping. No transformed components")
 		return
-	
+
 	for idx, master in enumerate(font.masters):
 		for name in bad_components:
-			print "Decomposing transformed %s in %s" % (
+			print("Decomposing transformed %s in %s" % (
 				name, master.name
-			)
+			))
 			font.glyphs[name].layers[idx].decomposeComponents()
 
 		

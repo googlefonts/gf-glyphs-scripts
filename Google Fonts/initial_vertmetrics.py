@@ -34,7 +34,7 @@ def recursiveDecompositionUnicodes(char):
         recursive = []  
         for code in decompositionList:
             if code:
-                r = recursiveDecompositionUnicodes(unichr(int(code, 16)))
+                r = recursiveDecompositionUnicodes(chr(int(code, 16)))
                 recursive.extend(r)
         
         if recursive:

@@ -50,6 +50,19 @@ def gen_copyright_string(font):
     """Automatically Generate the family's copyright string, using the
     GF Repo doc, http://tinyurl.com/kd9lort"""
     current_copyright = font.copyright
+
+    # Google Fonts no longer accepts new families with a Reserved Font Name.
+    # Removing an RFN is the original author's call (it's a licensing decision),
+    # so warn and leave the existing copyright untouched rather than silently
+    # rewriting it.
+    current_rfn = re.search(r'(?<=Reserved Font Name \").*(?=\")', current_copyright)
+    if current_rfn:
+        print('WARNING: Font contains a Reserved Font Name ("%s"). Google Fonts '
+              'no longer accepts new families with RFNs. Copyright string left '
+              'as-is; please remove the RFN before submitting.'
+              % current_rfn.group(0))
+        return
+
     year = re.search(r'[0-9]{4}', current_copyright)
     if year:
         year = year.group(0)
@@ -57,7 +70,6 @@ def gen_copyright_string(font):
         year = datetime.now().year
 
     project_name = font.familyName
-    current_rfn = re.search(r'(?<=Reserved Font Name \").*(?=\")', current_copyright)
 
     repo_doc = RepoDoc()
     git_url = repo_doc.family_url(font.familyName)
@@ -67,21 +79,11 @@ def gen_copyright_string(font):
                'for the GF sheet API to update it.' % UPSTREAM_REPO_DOC)
         return
 
-    if not current_rfn:
-        new_copyright = 'Copyright %s The %s Project Authors (%s)' % (
-            year,
-            project_name,
-            git_url
-        )
-    else:
-        new_copyright = ('Copyright %s The %s Project Authors (%s), '
-                         'with Reserved Font Name "(%s)".') % (
-            year,
-            project_name,
-            git_url,
-            current_rfn.group(0)
-        )
-    font.copyright = new_copyright
+    font.copyright = 'Copyright %s The %s Project Authors (%s)' % (
+        year,
+        project_name,
+        git_url,
+    )
 
 
 def gen_ofl(copyright_string):
@@ -160,16 +162,16 @@ def main():
     for key in BAD_PARAMETERS:
         del font.customParameters[key]
 
-    # Add http:// to manufacturerURL and designerURL if they don't exist
+    # Add https:// to manufacturerURL and designerURL if they don't exist
     if font.manufacturerURL:
         if not font.manufacturerURL.startswith(('http://', 'https://')):
-            font.manufacturerURL = 'http://' + font.manufacturerURL
+            font.manufacturerURL = 'https://' + font.manufacturerURL
     else:
         print('WARNING: manufacturerURL is missing')
 
     if font.designerURL:
         if not font.designerURL.startswith(('http://', 'https://')):
-            font.designerURL = 'http://' + font.designerURL
+            font.designerURL = 'https://' + font.designerURL
     else:
         print('WARNING: designerURL is missing')
 

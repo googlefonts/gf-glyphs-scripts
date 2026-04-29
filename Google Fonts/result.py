@@ -28,7 +28,7 @@ class GlyphsTestResult(TestResult):
         if self.buffer:
             output = sys.stdout.getvalue()
             error = sys.stderr.getvalue()
-            print error
+            print(error)
             if output:
                 if not output.endswith('\n'):
                     output += '\n'
